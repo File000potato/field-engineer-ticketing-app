@@ -2,6 +2,7 @@ import React from 'react';
 import AppRouter from '@/components/AppRouter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
+import OfflineQueueProvider from '@/components/OfflineQueueProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,8 +16,10 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppRouter />
-      <Toaster />
+      <OfflineQueueProvider>
+        <AppRouter />
+        <Toaster />
+      </OfflineQueueProvider>
     </QueryClientProvider>
   );
 }
