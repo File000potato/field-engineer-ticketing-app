@@ -287,4 +287,73 @@ export default function MapPage() {
                         <span className="flex-shrink-0">
                           {ticket.distance < 1 
                             ? `${Math.round(ticket.distance * 1000)}m` 
-                            : `${ticket.distance.toFixed(1)}km`\n                          }\n                        </span>\n                      )}\n                    </div>\n\n                    {selectedTicket === ticket.id && (\n                      <div className=\"space-y-2 pt-2 border-t\">\n                        <div className=\"grid grid-cols-2 gap-2\">\n                          <Button \n                            size=\"sm\" \n                            onClick={(e) => {\n                              e.stopPropagation();\n                              navigate(`/tickets/${ticket.id}`);\n                            }}\n                          >\n                            View Details\n                          </Button>\n                          {hasLocation ? (\n                            <Button \n                              variant=\"outline\" \n                              size=\"sm\"\n                              onClick={(e) => {\n                                e.stopPropagation();\n                                openInMaps(ticket.locationData!);\n                              }}\n                            >\n                              <Navigation className=\"w-3 h-3 mr-1\" />\n                              Navigate\n                            </Button>\n                          ) : (\n                            <Button \n                              variant=\"outline\" \n                              size=\"sm\"\n                              disabled\n                              className=\"text-muted-foreground\"\n                            >\n                              No GPS Data\n                            </Button>\n                          )}\n                        </div>\n                        {hasLocation && ticket.locationData && (\n                          <p className=\"text-xs text-muted-foreground\">\n                            📍 {ticket.locationData.lat.toFixed(6)}, {ticket.locationData.lng.toFixed(6)}\n                          </p>\n                        )}\n                      </div>\n                    )}\n                  </div>\n                </CardContent>\n              </Card>\n            );\n          })\n        )}\n      </div>\n\n      {/* Map Integration Note */}\n      <Card className=\"bg-muted/50\">\n        <CardContent className=\"pt-6\">\n          <div className=\"text-center space-y-2\">\n            <MapPin className=\"w-8 h-8 mx-auto text-muted-foreground\" />\n            <p className=\"text-sm text-muted-foreground\">\n              Interactive map view coming soon! For now, use the navigation buttons to open locations in your maps app.\n            </p>\n          </div>\n        </CardContent>\n      </Card>\n    </div>\n  );\n};"}
+                            : `${ticket.distance.toFixed(1)}km`
+                          }
+                        </span>
+                      )}
+                    </div>
+
+                    {selectedTicket === ticket.id && (
+                      <div className="space-y-2 pt-2 border-t">
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button 
+                            size="sm" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/tickets/${ticket.id}`);
+                            }}
+                          >
+                            View Details
+                          </Button>
+                          {hasLocation ? (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openInMaps(ticket.locationData!);
+                              }}
+                            >
+                              <Navigation className="w-3 h-3 mr-1" />
+                              Navigate
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              disabled
+                              className="text-muted-foreground"
+                            >
+                              No GPS Data
+                            </Button>
+                          )}
+                        </div>
+                        {hasLocation && ticket.locationData && (
+                          <p className="text-xs text-muted-foreground">
+                            📍 {ticket.locationData.lat.toFixed(6)}, {ticket.locationData.lng.toFixed(6)}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
+      </div>
+
+      {/* Map Integration Note */}
+      <Card className="bg-muted/50">
+        <CardContent className="pt-6">
+          <div className="text-center space-y-2">
+            <MapPin className="w-8 h-8 mx-auto text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Interactive map view coming soon! For now, use the navigation buttons to open locations in your maps app.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
