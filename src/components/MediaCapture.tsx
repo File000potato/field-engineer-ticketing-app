@@ -17,7 +17,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { uploadFile, getFileUrl } from '@/lib/supabase';
+import { uploadFile, getFileUrl, supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 interface MediaFile {
