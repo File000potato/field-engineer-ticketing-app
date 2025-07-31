@@ -18,6 +18,7 @@ import { LogOut, Shield, User } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useUserRole } from '@/hooks/useUserRole';
+import NotificationBell from '@/components/NotificationBell';
 
 export default function AppRouter() {
   const { user, loading, signOut } = useAuth();
@@ -59,6 +60,7 @@ export default function AppRouter() {
               </div>
               <div className="flex items-center gap-2">
                 <OfflineIndicator />
+                <NotificationBell />
                 <ThemeToggle />
                 <Button variant="ghost" size="sm" onClick={signOut} className="hover:bg-destructive/10">
                   <LogOut className="w-4 h-4" />
