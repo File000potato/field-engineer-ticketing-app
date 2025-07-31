@@ -1,208 +1,369 @@
 import { useState, useEffect } from 'react';
-import { Ticket, Activity } from '@/types/ticket';
+import { supabase, dbHelpers, subscribeToTickets } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { Ticket, Activity, TicketMedia } from '@/types/ticket';
 import { toast } from '@/components/ui/use-toast';
 
-const STORAGE_KEY = 'ticketing_app_data';
-
-interface TicketData {
-  tickets: Ticket[];
-  activities: Activity[];
-}
-
-const mockTickets: Ticket[] = [
-  {
-    id: '1',
-    title: 'Generator Unit 3 Not Starting',
-    description: 'Generator fails to start during routine check. No error codes displayed.',
-    type: 'fault',
-    priority: 'high',
-    status: 'open',
-    equipmentId: 'GEN-003',
-    equipmentName: 'Diesel Generator Unit 3',
-    location: 'Power Plant - Building A',
-    reportedBy: 'John Smith',
-    createdAt: new Date('2024-01-15T09:30:00'),
-    updatedAt: new Date('2024-01-15T09:30:00')
-  },
-  {
-    id: '2',
-    title: 'Scheduled Maintenance - Pump System',
-    description: 'Monthly maintenance check for cooling pump system including filter replacement.',
-    type: 'maintenance',
-    priority: 'medium',
-    status: 'in-progress',
-    equipmentId: 'PUMP-012',
-    equipmentName: 'Cooling Pump System',
-    location: 'Facility B - Ground Floor',
-    reportedBy: 'Sarah Johnson',
-    assignedTo: 'Mike Wilson',
-    createdAt: new Date('2024-01-14T14:15:00'),
-    updatedAt: new Date('2024-01-15T08:00:00')
-  }
-];
-
-const mockActivities: Activity[] = [
-  {
-    id: '1',
-    ticketId: '2',
-    type: 'status_change',
-    description: 'Status changed from Open to In Progress',
-    performedBy: 'Mike Wilson',
-    timestamp: new Date('2024-01-15T08:00:00')
-  }
-];
-
 export const useTickets = () => {
+  const { user, profile } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Load tickets on mount and when user changes
   useEffect(() => {
-    const loadData = () => {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const data: TicketData = JSON.parse(stored);
-          setTickets(data.tickets.map(t => ({
-            ...t,
-            createdAt: new Date(t.createdAt),
-            updatedAt: new Date(t.updatedAt),
-            resolvedAt: t.resolvedAt ? new Date(t.resolvedAt) : undefined
-          })));
-          setActivities(data.activities.map(a => ({
-            ...a,
-            timestamp: new Date(a.timestamp)
-          })));
-        } else {
-          setTickets(mockTickets);
-          setActivities(mockActivities);
-        }
-      } catch (error) {
-        console.error('Error loading data:', error);
-        setTickets(mockTickets);
-        setActivities(mockActivities);
-      } finally {
-        setLoading(false);
-      }
+    if (user && profile) {
+      loadTickets();
+    } else {
+      setTickets([]);
+      setLoading(false);
+    }
+  }, [user, profile]);
+
+  // Subscribe to real-time ticket updates
+  useEffect(() => {
+    if (!user) return;
+
+    const subscription = subscribeToTickets(
+      (payload) => {
+        console.log('Real-time ticket update:', payload);
+        
+        // Reload tickets when changes occur
+        loadTickets();
+      },
+      user.id
+    );
+
+    return () => {
+      subscription.unsubscribe();
     };
+  }, [user]);
 
-    loadData();
-  }, []);
+  const loadTickets = async () => {
+    if (!user || !profile) return;
 
-  const saveData = (newTickets: Ticket[], newActivities: Activity[]) => {
     try {
-      const data: TicketData = {
-        tickets: newTickets,
-        activities: newActivities
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (error) {
-      console.error('Error saving data:', error);
+      setLoading(true);
+      setError(null);
+      
+      const data = await dbHelpers.getTicketsWithRelations(user.id, profile.role);
+      
+      // Transform database format to frontend format
+      const transformedTickets: Ticket[] = data.map(ticket => ({
+        ...ticket,
+        created_at: new Date(ticket.created_at),
+        updated_at: new Date(ticket.updated_at),
+        assigned_at: ticket.assigned_at ? new Date(ticket.assigned_at) : undefined,
+        resolved_at: ticket.resolved_at ? new Date(ticket.resolved_at) : undefined,
+        verified_at: ticket.verified_at ? new Date(ticket.verified_at) : undefined,
+        due_date: ticket.due_date ? new Date(ticket.due_date) : undefined,
+      }));
+      
+      setTickets(transformedTickets);
+    } catch (err: any) {
+      console.error('Error loading tickets:', err);
+      setError(err.message);
       toast({
-        title: 'Error',
-        description: 'Failed to save data',
+        title: 'Error loading tickets',
+        description: err.message || 'Failed to load tickets',
         variant: 'destructive'
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const createTicket = (ticketData: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newTicket: Ticket = {
-      ...ticketData,
-      id: Date.now().toString(),
-      equipmentId: `EQ-${Date.now()}`,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+  const createTicket = async (ticketData: {
+    title: string;
+    description: string;
+    type?: string;
+    priority?: string;
+    location: string;
+    latitude?: number;
+    longitude?: number;
+    equipment_id?: string;
+    due_date?: Date;
+    estimated_hours?: number;
+  }) => {
+    if (!user) throw new Error('User not authenticated');
 
-    const newTickets = [...tickets, newTicket];
-    const newActivity: Activity = {
-      id: Date.now().toString(),
-      ticketId: newTicket.id,
-      type: 'comment',
-      description: `Ticket created: ${newTicket.title}`,
-      performedBy: ticketData.reportedBy,
-      timestamp: new Date()
-    };
-    const newActivities = [...activities, newActivity];
+    try {
+      const { data, error } = await supabase
+        .from('tickets')
+        .insert({
+          ...ticketData,
+          created_by: user.id,
+          due_date: ticketData.due_date?.toISOString(),
+        })
+        .select(`
+          *,
+          equipment(*),
+          created_by_profile:user_profiles!tickets_created_by_fkey(*),
+          assigned_to_profile:user_profiles!tickets_assigned_to_fkey(*),
+          verified_by_profile:user_profiles!tickets_verified_by_fkey(*)
+        `)
+        .single();
 
-    setTickets(newTickets);
-    setActivities(newActivities);
-    saveData(newTickets, newActivities);
+      if (error) throw error;
 
-    toast({
-      title: 'Success',
-      description: 'Ticket created successfully'
-    });
+      const transformedTicket: Ticket = {
+        ...data,
+        created_at: new Date(data.created_at),
+        updated_at: new Date(data.updated_at),
+        assigned_at: data.assigned_at ? new Date(data.assigned_at) : undefined,
+        resolved_at: data.resolved_at ? new Date(data.resolved_at) : undefined,
+        verified_at: data.verified_at ? new Date(data.verified_at) : undefined,
+        due_date: data.due_date ? new Date(data.due_date) : undefined,
+      };
 
-    return newTicket;
+      setTickets(prev => [transformedTicket, ...prev]);
+      
+      toast({
+        title: 'Ticket created',
+        description: 'Your ticket has been created successfully.',
+      });
+
+      return transformedTicket;
+    } catch (error: any) {
+      console.error('Error creating ticket:', error);
+      toast({
+        title: 'Failed to create ticket',
+        description: error.message || 'An error occurred while creating the ticket.',
+        variant: 'destructive'
+      });
+      throw error;
+    }
   };
 
-  const updateTicketStatus = (ticketId: string, status: Ticket['status']) => {
-    const newTickets = tickets.map(ticket => 
-      ticket.id === ticketId 
-        ? { 
-            ...ticket, 
-            status, 
-            updatedAt: new Date(),
-            resolvedAt: status === 'resolved' ? new Date() : ticket.resolvedAt
-          }
-        : ticket
+  const updateTicket = async (ticketId: string, updates: Partial<Ticket>) => {
+    if (!user) throw new Error('User not authenticated');
+
+    try {
+      // Transform dates to ISO strings for database
+      const dbUpdates: any = { ...updates };
+      if (dbUpdates.due_date) {
+        dbUpdates.due_date = dbUpdates.due_date.toISOString();
+      }
+      if (dbUpdates.assigned_at) {
+        dbUpdates.assigned_at = dbUpdates.assigned_at.toISOString();
+      }
+      if (dbUpdates.resolved_at) {
+        dbUpdates.resolved_at = dbUpdates.resolved_at.toISOString();
+      }
+      if (dbUpdates.verified_at) {
+        dbUpdates.verified_at = dbUpdates.verified_at.toISOString();
+      }
+
+      // Set timestamps for status changes
+      if (updates.status === 'assigned' && !updates.assigned_at) {
+        dbUpdates.assigned_at = new Date().toISOString();
+      }
+      if (updates.status === 'resolved' && !updates.resolved_at) {
+        dbUpdates.resolved_at = new Date().toISOString();
+      }
+      if (updates.status === 'verified' && !updates.verified_at) {
+        dbUpdates.verified_at = new Date().toISOString();
+        dbUpdates.verified_by = user.id;
+      }
+
+      const { data, error } = await supabase
+        .from('tickets')
+        .update(dbUpdates)
+        .eq('id', ticketId)
+        .select(`
+          *,
+          equipment(*),
+          created_by_profile:user_profiles!tickets_created_by_fkey(*),
+          assigned_to_profile:user_profiles!tickets_assigned_to_fkey(*),
+          verified_by_profile:user_profiles!tickets_verified_by_fkey(*)
+        `)
+        .single();
+
+      if (error) throw error;
+
+      const transformedTicket: Ticket = {
+        ...data,
+        created_at: new Date(data.created_at),
+        updated_at: new Date(data.updated_at),
+        assigned_at: data.assigned_at ? new Date(data.assigned_at) : undefined,
+        resolved_at: data.resolved_at ? new Date(data.resolved_at) : undefined,
+        verified_at: data.verified_at ? new Date(data.verified_at) : undefined,
+        due_date: data.due_date ? new Date(data.due_date) : undefined,
+      };
+
+      setTickets(prev => prev.map(t => t.id === ticketId ? transformedTicket : t));
+      
+      toast({
+        title: 'Ticket updated',
+        description: 'The ticket has been updated successfully.',
+      });
+
+      return transformedTicket;
+    } catch (error: any) {
+      console.error('Error updating ticket:', error);
+      toast({
+        title: 'Failed to update ticket',
+        description: error.message || 'An error occurred while updating the ticket.',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
+  const deleteTicket = async (ticketId: string) => {
+    if (!user) throw new Error('User not authenticated');
+
+    try {
+      const { error } = await supabase
+        .from('tickets')
+        .delete()
+        .eq('id', ticketId);
+
+      if (error) throw error;
+
+      setTickets(prev => prev.filter(t => t.id !== ticketId));
+      
+      toast({
+        title: 'Ticket deleted',
+        description: 'The ticket has been deleted successfully.',
+      });
+    } catch (error: any) {
+      console.error('Error deleting ticket:', error);
+      toast({
+        title: 'Failed to delete ticket',
+        description: error.message || 'An error occurred while deleting the ticket.',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
+  const assignTicket = async (ticketId: string, assignedTo: string | null) => {
+    return updateTicket(ticketId, { 
+      assigned_to: assignedTo,
+      status: assignedTo ? 'assigned' : 'open',
+      assigned_at: assignedTo ? new Date() : undefined
+    });
+  };
+
+  const addComment = async (ticketId: string, comment: string) => {
+    if (!user) throw new Error('User not authenticated');
+
+    try {
+      const { error } = await supabase
+        .from('ticket_activities')
+        .insert({
+          ticket_id: ticketId,
+          user_id: user.id,
+          type: 'comment',
+          description: comment,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Comment added',
+        description: 'Your comment has been added to the ticket.',
+      });
+    } catch (error: any) {
+      console.error('Error adding comment:', error);
+      toast({
+        title: 'Failed to add comment',
+        description: error.message || 'An error occurred while adding the comment.',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
+  const getTicketActivities = async (ticketId: string): Promise<Activity[]> => {
+    try {
+      const data = await dbHelpers.getTicketActivities(ticketId);
+      
+      return data.map(activity => ({
+        ...activity,
+        created_at: new Date(activity.created_at),
+      }));
+    } catch (error: any) {
+      console.error('Error loading ticket activities:', error);
+      toast({
+        title: 'Failed to load activities',
+        description: error.message || 'An error occurred while loading ticket activities.',
+        variant: 'destructive'
+      });
+      return [];
+    }
+  };
+
+  const getTicketMedia = async (ticketId: string): Promise<TicketMedia[]> => {
+    try {
+      const data = await dbHelpers.getTicketMedia(ticketId);
+      
+      return data.map(media => ({
+        ...media,
+        created_at: new Date(media.created_at),
+      }));
+    } catch (error: any) {
+      console.error('Error loading ticket media:', error);
+      toast({
+        title: 'Failed to load media',
+        description: error.message || 'An error occurred while loading ticket media.',
+        variant: 'destructive'
+      });
+      return [];
+    }
+  };
+
+  // Helper functions for role-based filtering
+  const getMyTickets = () => {
+    if (!user) return [];
+    return tickets.filter(ticket => ticket.created_by === user.id);
+  };
+
+  const getAssignedTickets = () => {
+    if (!user) return [];
+    return tickets.filter(ticket => ticket.assigned_to === user.id);
+  };
+
+  const getUnassignedTickets = () => {
+    return tickets.filter(ticket => !ticket.assigned_to && ticket.status === 'open');
+  };
+
+  const getTicketsByStatus = (status: string) => {
+    return tickets.filter(ticket => ticket.status === status);
+  };
+
+  const getTicketsByPriority = (priority: string) => {
+    return tickets.filter(ticket => ticket.priority === priority);
+  };
+
+  const getOverdueTickets = () => {
+    const now = new Date();
+    return tickets.filter(ticket => 
+      ticket.due_date && 
+      ticket.due_date < now && 
+      !['resolved', 'verified', 'closed'].includes(ticket.status)
     );
-
-    const newActivity: Activity = {
-      id: Date.now().toString(),
-      ticketId,
-      type: 'status_change',
-      description: `Status changed to ${status}`,
-      performedBy: 'Current User',
-      timestamp: new Date()
-    };
-    const newActivities = [...activities, newActivity];
-
-    setTickets(newTickets);
-    setActivities(newActivities);
-    saveData(newTickets, newActivities);
-
-    toast({
-      title: 'Success',
-      description: 'Ticket status updated'
-    });
-  };
-
-  const addNote = (ticketId: string, note: string) => {
-    const newActivity: Activity = {
-      id: Date.now().toString(),
-      ticketId,
-      type: 'comment',
-      description: note,
-      performedBy: 'Current User',
-      timestamp: new Date()
-    };
-    const newActivities = [...activities, newActivity];
-
-    setActivities(newActivities);
-    saveData(tickets, newActivities);
-
-    toast({
-      title: 'Success',
-      description: 'Note added successfully'
-    });
-  };
-
-  const getActivitiesForTicket = (ticketId: string) => {
-    return activities
-      .filter(activity => activity.ticketId === ticketId)
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   };
 
   return {
     tickets,
-    activities,
     loading,
+    error,
     createTicket,
-    updateTicketStatus,
-    addNote,
-    getActivitiesForTicket
+    updateTicket,
+    deleteTicket,
+    assignTicket,
+    addComment,
+    getTicketActivities,
+    getTicketMedia,
+    loadTickets,
+    // Helper functions
+    getMyTickets,
+    getAssignedTickets,
+    getUnassignedTickets,
+    getTicketsByStatus,
+    getTicketsByPriority,
+    getOverdueTickets,
   };
 };
