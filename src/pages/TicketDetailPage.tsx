@@ -36,9 +36,16 @@ export default function TicketDetailPage() {
   const [newNote, setNewNote] = useState('');
   const [newStatus, setNewStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activities, setActivities] = useState<any[]>([]);
 
   const ticket = tickets.find(t => t.id === id);
-  const activities = ticket ? getTicketActivities(ticket.id) : [];
+
+  // Load activities when ticket is found
+  React.useEffect(() => {
+    if (ticket) {
+      getTicketActivities(ticket.id).then(setActivities);
+    }
+  }, [ticket, getTicketActivities]);
 
   if (!ticket) {
     return (
