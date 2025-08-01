@@ -12,13 +12,8 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10,
-    },
-  },
+    detectSessionInUrl: false, // Disable to prevent issues with URL parsing
+  }
 });
 
 // Helper function to get current user profile
