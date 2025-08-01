@@ -190,7 +190,7 @@ export default function SupervisorDashboard() {
         )}>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <Assignment className={cn(
+              <UserPlus className={cn(
                 "w-5 h-5",
                 (teamStats?.unassigned_tickets || 0) > 0 ? "text-yellow-600" : "text-gray-400"
               )} />
