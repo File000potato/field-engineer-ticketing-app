@@ -360,7 +360,7 @@ export default function SupervisorDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Assignment className="w-5 h-5" />
+              <UserPlus className="w-5 h-5" />
               Quick Assignment
             </CardTitle>
           </CardHeader>
