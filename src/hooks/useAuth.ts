@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase, getCurrentUserProfile } from '@/lib/supabase';
+import { supabase, authClient, getCurrentUserProfile } from '@/lib/supabase';
 import { UserProfile } from '@/types/ticket';
 import { toast } from '@/components/ui/use-toast';
 import { securityService } from '@/lib/security';
