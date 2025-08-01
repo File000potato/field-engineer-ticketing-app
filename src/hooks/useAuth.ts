@@ -117,7 +117,7 @@ export function useAuth() {
     try {
       setState(prev => ({ ...prev, loading: true }));
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await authClient.auth.signInWithPassword({
         email,
         password,
       });
