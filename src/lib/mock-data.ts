@@ -276,6 +276,44 @@ export const mockDbHelpers = {
     return newTicket;
   },
 
+  async getTicketActivities(ticketId: string) {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // Mock activities for tickets
+    const activities = [
+      {
+        id: `act-${ticketId}-1`,
+        ticket_id: ticketId,
+        user_id: '1',
+        type: 'created' as const,
+        description: 'Ticket created',
+        created_at: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+        user_profile: mockUsers[0]
+      },
+      {
+        id: `act-${ticketId}-2`,
+        ticket_id: ticketId,
+        user_id: '2',
+        type: 'assigned' as const,
+        description: 'Ticket assigned to Field Engineer',
+        created_at: new Date(Date.now() - 23 * 60 * 60 * 1000), // 23 hours ago
+        user_profile: mockUsers[1]
+      },
+      {
+        id: `act-${ticketId}-3`,
+        ticket_id: ticketId,
+        user_id: '3',
+        type: 'comment' as const,
+        description: 'Started investigating the issue',
+        created_at: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        user_profile: mockUsers[2]
+      }
+    ];
+
+    return activities;
+  },
+
   async getDashboardStats(userId: string) {
     await new Promise(resolve => setTimeout(resolve, 200));
     return mockDashboardStats;
