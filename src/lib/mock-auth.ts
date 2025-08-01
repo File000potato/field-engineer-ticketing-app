@@ -15,7 +15,7 @@ interface MockProfile {
   updated_at: string;
 }
 
-// Mock users database
+// Mock users database (using lowercase keys for case-insensitive lookup)
 const mockUsers = new Map<string, { user: MockUser; profile: MockProfile; password: string }>([
   ['admin@test.com', {
     user: {
