@@ -22,17 +22,38 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 });
 
 // Helper function to get current user profile
-export const getCurrentUserProfile = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+export const getCurrentUserProfile = async (existingUser?: any) => {
+  try {
+    // Use existing user if provided to avoid redundant API calls
+    let user = existingUser;
 
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+    if (!user) {
+      const { data: { user: fetchedUser }, error } = await supabase.auth.getUser();
+      if (error) {
+        console.warn('Error fetching user:', error.message);
+        return null;
+      }
+      user = fetchedUser;
+    }
 
-  return profile;
+    if (!user) return null;
+
+    const { data: profile, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (error) {
+      console.warn('Error fetching profile:', error.message);
+      return null;
+    }
+
+    return profile;
+  } catch (error) {
+    console.warn('Error in getCurrentUserProfile:', error);
+    return null;
+  }
 };
 
 // Helper function to check if user has required role
