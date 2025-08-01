@@ -22,6 +22,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { dbHelpers, supabase } from '@/lib/supabase';
+import { mockDbHelpers, mockUsers } from '@/lib/mock-data';
 import { UserProfile } from '@/types/ticket';
 import { cn } from '@/lib/utils';
 
