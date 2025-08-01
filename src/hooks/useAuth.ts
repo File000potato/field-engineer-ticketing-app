@@ -141,15 +141,15 @@ export function useAuth() {
         if (profile && !profile.is_active) {
           await supabase.auth.signOut();
 
-          // Audit inactive user login attempt
-          await auditService.logEvent(
-            AUDIT_ACTIONS.UNAUTHORIZED_ACCESS,
-            AUDIT_RESOURCES.USER,
-            { reason: 'inactive_account', email },
-            profile.id,
-            profile.id,
-            email
-          );
+          // Temporarily disabled audit logging to debug response body issue
+          // await auditService.logEvent(
+          //   AUDIT_ACTIONS.UNAUTHORIZED_ACCESS,
+          //   AUDIT_RESOURCES.USER,
+          //   { reason: 'inactive_account', email },
+          //   profile.id,
+          //   profile.id,
+          //   email
+          // );
 
           throw new Error('Your account has been deactivated. Please contact an administrator.');
         }
