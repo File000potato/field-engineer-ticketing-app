@@ -30,7 +30,7 @@ export default function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { tickets, updateTicketStatus, addNote, getActivitiesForTicket } = useTickets();
+  const { tickets, updateTicketStatus, addNote, getTicketActivities } = useTickets();
   const { isAdmin } = useUserRole(user);
   
   const [newNote, setNewNote] = useState('');
