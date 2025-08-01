@@ -7,13 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { 
-  Users, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Users,
+  AlertTriangle,
+  CheckCircle,
   Clock,
   TrendingUp,
-  Assignment,
+  UserPlus,
   BarChart3,
   Shield,
   UserCheck,
