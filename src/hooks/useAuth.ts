@@ -139,7 +139,7 @@ export function useAuth() {
 
       // Check if user is active
       if (data.user) {
-        const profile = await getCurrentUserProfile(data.user);
+        const profile = await getCurrentUserProfileMock(data.user);
         if (profile && !profile.is_active) {
           await supabase.auth.signOut();
 
