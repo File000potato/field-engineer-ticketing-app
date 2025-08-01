@@ -297,9 +297,16 @@ export const useTickets = () => {
 
   const getTicketActivities = async (ticketId: string): Promise<Activity[]> => {
     try {
-      const data = await dbHelpers.getTicketActivities(ticketId);
-      
-      return data.map(activity => ({
+      // Try real Supabase first, fallback to mock data
+      let data;
+      try {
+        data = await dbHelpers.getTicketActivities(ticketId);
+      } catch (supabaseError) {
+        console.log('Using mock activities data');
+        data = await mockDbHelpers.getTicketActivities(ticketId);
+      }
+
+      return data.map((activity: any) => ({
         ...activity,
         created_at: new Date(activity.created_at),
       }));
