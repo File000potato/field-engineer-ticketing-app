@@ -209,18 +209,71 @@ export const mockDashboardStats = {
   overdue_tickets: mockTickets.filter(t => t.due_date && new Date(t.due_date) < new Date() && !['resolved', 'verified', 'closed'].includes(t.status)).length
 };
 
+// Store tickets in memory for mock operations
+let currentMockTickets = [...mockTickets];
+let nextTicketId = 4;
+
 // Mock data helper functions
 export const mockDbHelpers = {
   async getTicketsWithRelations(userId?: string, role?: string) {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 300));
-    
+
     // Filter tickets based on role
     if (role === 'field_engineer' && userId) {
-      return mockTickets.filter(t => t.created_by === userId || t.assigned_to === userId);
+      return currentMockTickets.filter(t => t.created_by === userId || t.assigned_to === userId);
     }
-    
-    return mockTickets;
+
+    return currentMockTickets;
+  },
+
+  async createTicket(ticketData: any, userId: string) {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    const currentUser = mockUsers.find(u => u.id === userId);
+    if (!currentUser) {
+      throw new Error('User not found');
+    }
+
+    const newTicket = {
+      id: String(nextTicketId++),
+      ticket_number: `TKT-${String(nextTicketId - 1).padStart(3, '0')}`,
+      title: ticketData.title,
+      description: ticketData.description,
+      type: ticketData.type || 'maintenance',
+      priority: ticketData.priority || 'medium',
+      status: 'open' as const,
+      created_by: userId,
+      assigned_to: null,
+      equipment_id: ticketData.equipment_id || null,
+      location: ticketData.location,
+      created_at: new Date(),
+      updated_at: new Date(),
+      due_date: ticketData.due_date || null,
+      estimated_hours: ticketData.estimated_hours || null,
+      actual_hours: 0,
+      notes: null,
+      created_by_profile: currentUser,
+      assigned_to_profile: null,
+      verified_by_profile: null,
+      equipment: ticketData.equipment_id ? {
+        id: ticketData.equipment_id,
+        name: 'Mock Equipment',
+        type: 'general',
+        model: 'Generic Model',
+        serial_number: 'MOCK-001',
+        location: ticketData.location,
+        installation_date: new Date(),
+        warranty_expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } : null
+    };
+
+    currentMockTickets.unshift(newTicket);
+    return newTicket;
   },
 
   async getDashboardStats(userId: string) {
