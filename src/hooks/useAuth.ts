@@ -74,7 +74,7 @@ export function useAuth() {
     getInitialSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { data: { subscription } } = mockAuth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
 
