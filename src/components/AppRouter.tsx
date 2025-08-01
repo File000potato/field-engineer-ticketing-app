@@ -79,6 +79,7 @@ export default function AppRouter() {
               <Route path="/create" element={<CreateTicketPage />} />
               <Route path="/map" element={<MapPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/admin/settings" element={<AdminSettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
