@@ -117,21 +117,32 @@ export function useAuth() {
     try {
       setState(prev => ({ ...prev, loading: true }));
 
-      const { data, error } = await authClient.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Add a small delay to prevent race conditions
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      let authResult;
+      try {
+        authResult = await authClient.auth.signInWithPassword({
+          email,
+          password,
+        });
+      } catch (authError: any) {
+        console.error('Auth client error:', authError);
+        // Fallback to main client
+        authResult = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+      }
+
+      const { data, error } = authResult;
 
       if (error) {
-        // Temporarily disabled audit logging to debug response body issue
-        // await auditService.logEvent(
-        //   AUDIT_ACTIONS.USER_LOGIN,
-        //   AUDIT_RESOURCES.USER,
-        //   { success: false, error: error.message, email },
-        //   undefined,
-        //   undefined,
-        //   email
-        // );
+        console.error('Sign in error details:', {
+          message: error.message,
+          status: error.status,
+          name: error.name
+        });
         throw error;
       }
 
