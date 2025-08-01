@@ -190,6 +190,17 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
           <p className="text-sm text-muted-foreground text-center">
             Secure access to your maintenance management system
           </p>
+
+          {/* Test Account Information */}
+          <Alert className="mt-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              <strong>Demo Mode:</strong> Use test accounts:<br/>
+              • admin@test.com / admin123<br/>
+              • supervisor@test.com / supervisor123<br/>
+              • engineer@test.com / engineer123
+            </AlertDescription>
+          </Alert>
         </CardHeader>
         
         <CardContent>
