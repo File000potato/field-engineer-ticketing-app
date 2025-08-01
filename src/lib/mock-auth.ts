@@ -85,7 +85,15 @@ export const mockAuth = {
 
     // Make email lookup case-insensitive
     const email = credentials.email.toLowerCase().trim();
-    const mockUser = mockUsers.get(email);
+
+    // Find user with case-insensitive email matching
+    let mockUser = null;
+    for (const [key, user] of mockUsers.entries()) {
+      if (key.toLowerCase() === email) {
+        mockUser = user;
+        break;
+      }
+    }
 
     if (!mockUser) {
       console.log('Available test accounts:', Array.from(mockUsers.keys()));
