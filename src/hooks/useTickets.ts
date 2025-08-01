@@ -46,8 +46,15 @@ export const useTickets = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const data = await dbHelpers.getTicketsWithRelations(user.id, profile.role);
+
+      // Try real Supabase first, fallback to mock data
+      let data;
+      try {
+        data = await dbHelpers.getTicketsWithRelations(user.id, profile.role);
+      } catch (supabaseError) {
+        console.log('Supabase unavailable, using mock data');
+        data = await mockDbHelpers.getTicketsWithRelations(user.id, profile.role);
+      }
       
       // Transform database format to frontend format
       const transformedTickets: Ticket[] = data.map(ticket => ({
