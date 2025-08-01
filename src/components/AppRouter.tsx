@@ -6,6 +6,7 @@ import CreateTicketPage from '@/pages/CreateTicketPage';
 import TicketDetailPage from '@/pages/TicketDetailPage';
 import MapPage from '@/pages/MapPage';
 import ProfilePage from '@/pages/ProfilePage';
+import AdminSettingsPage from '@/pages/AdminSettingsPage';
 import NotFound from '@/pages/NotFound';
 import BottomNavigation from '@/components/BottomNavigation';
 import { useAuth } from '@/hooks/useAuth';
