@@ -123,15 +123,15 @@ export function useAuth() {
       });
 
       if (error) {
-        // Audit failed login attempt
-        await auditService.logEvent(
-          AUDIT_ACTIONS.USER_LOGIN,
-          AUDIT_RESOURCES.USER,
-          { success: false, error: error.message, email },
-          undefined,
-          undefined,
-          email
-        );
+        // Temporarily disabled audit logging to debug response body issue
+        // await auditService.logEvent(
+        //   AUDIT_ACTIONS.USER_LOGIN,
+        //   AUDIT_RESOURCES.USER,
+        //   { success: false, error: error.message, email },
+        //   undefined,
+        //   undefined,
+        //   email
+        // );
         throw error;
       }
 
