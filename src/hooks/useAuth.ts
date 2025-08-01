@@ -122,8 +122,8 @@ export function useAuth() {
       // Add a small delay to prevent race conditions
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      console.log('Attempting sign in with minimal client...');
-      const { data, error } = await minimalSupabase.auth.signInWithPassword({
+      console.log('Using mock authentication system...');
+      const { data, error } = await mockAuth.signInWithPassword({
         email,
         password,
       });
