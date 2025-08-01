@@ -41,7 +41,7 @@ export function useAuth() {
         }
 
         if (session?.user && mounted) {
-          const profile = await getCurrentUserProfile();
+          const profile = await getCurrentUserProfile(session.user);
           setState({
             user: session.user,
             profile,
@@ -80,7 +80,7 @@ export function useAuth() {
 
         if (session?.user) {
           try {
-            const profile = await getCurrentUserProfile();
+            const profile = await getCurrentUserProfile(session.user);
             setState({
               user: session.user,
               profile,
@@ -137,7 +137,7 @@ export function useAuth() {
 
       // Check if user is active
       if (data.user) {
-        const profile = await getCurrentUserProfile();
+        const profile = await getCurrentUserProfile(data.user);
         if (profile && !profile.is_active) {
           await supabase.auth.signOut();
 
