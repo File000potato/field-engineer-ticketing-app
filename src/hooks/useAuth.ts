@@ -164,15 +164,15 @@ export function useAuth() {
           });
         });
 
-        // Audit successful login
-        await auditService.logEvent(
-          AUDIT_ACTIONS.USER_LOGIN,
-          AUDIT_RESOURCES.USER,
-          { success: true, userAgent: navigator.userAgent },
-          profile?.id,
-          profile?.id,
-          email
-        );
+        // Temporarily disabled audit logging to debug response body issue
+        // await auditService.logEvent(
+        //   AUDIT_ACTIONS.USER_LOGIN,
+        //   AUDIT_RESOURCES.USER,
+        //   { success: true, userAgent: navigator.userAgent },
+        //   profile?.id,
+        //   profile?.id,
+        //   email
+        // );
       }
 
       toast({
