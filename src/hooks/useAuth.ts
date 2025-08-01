@@ -32,7 +32,7 @@ export function useAuth() {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await mockAuth.getSession();
         
         if (error) {
           console.error('Error getting session:', error);
