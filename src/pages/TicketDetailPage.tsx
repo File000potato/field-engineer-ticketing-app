@@ -38,7 +38,7 @@ export default function TicketDetailPage() {
   const [loading, setLoading] = useState(false);
 
   const ticket = tickets.find(t => t.id === id);
-  const activities = ticket ? getActivitiesForTicket(ticket.id) : [];
+  const activities = ticket ? getTicketActivities(ticket.id) : [];
 
   if (!ticket) {
     return (
