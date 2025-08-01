@@ -3,6 +3,8 @@ import { User } from '@supabase/supabase-js';
 import { supabase, getCurrentUserProfile } from '@/lib/supabase';
 import { UserProfile } from '@/types/ticket';
 import { toast } from '@/components/ui/use-toast';
+import { securityService } from '@/lib/security';
+import { auditService, AUDIT_ACTIONS, AUDIT_RESOURCES } from '@/lib/audit';
 
 interface AuthState {
   user: User | null;
@@ -21,6 +23,9 @@ export function useAuth() {
 
   useEffect(() => {
     let mounted = true;
+
+    // Initialize security service
+    securityService.initialize().catch(console.error);
 
     // Get initial session
     const getInitialSession = async () => {
@@ -111,13 +116,22 @@ export function useAuth() {
   const signIn = async (email: string, password: string) => {
     try {
       setState(prev => ({ ...prev, loading: true }));
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        // Audit failed login attempt
+        await auditService.logEvent(
+          AUDIT_ACTIONS.USER_LOGIN,
+          AUDIT_RESOURCES.USER,
+          { success: false, error: error.message, email },
+          undefined,
+          undefined,
+          email
+        );
         throw error;
       }
 
@@ -126,8 +140,39 @@ export function useAuth() {
         const profile = await getCurrentUserProfile();
         if (profile && !profile.is_active) {
           await supabase.auth.signOut();
+
+          // Audit inactive user login attempt
+          await auditService.logEvent(
+            AUDIT_ACTIONS.UNAUTHORIZED_ACCESS,
+            AUDIT_RESOURCES.USER,
+            { reason: 'inactive_account', email },
+            profile.id,
+            profile.id,
+            email
+          );
+
           throw new Error('Your account has been deactivated. Please contact an administrator.');
         }
+
+        // Start inactivity timer
+        securityService.startInactivityTimer(() => {
+          signOut();
+          toast({
+            title: 'Session expired',
+            description: 'You have been logged out due to inactivity.',
+            variant: 'default'
+          });
+        });
+
+        // Audit successful login
+        await auditService.logEvent(
+          AUDIT_ACTIONS.USER_LOGIN,
+          AUDIT_RESOURCES.USER,
+          { success: true, userAgent: navigator.userAgent },
+          profile?.id,
+          profile?.id,
+          email
+        );
       }
 
       toast({
@@ -139,13 +184,13 @@ export function useAuth() {
     } catch (error: any) {
       console.error('Sign in error:', error);
       setState(prev => ({ ...prev, loading: false }));
-      
+
       toast({
         title: 'Sign in failed',
         description: error.message || 'An error occurred during sign in.',
         variant: 'destructive'
       });
-      
+
       throw error;
     }
   };
@@ -153,7 +198,7 @@ export function useAuth() {
   const signUp = async (email: string, password: string, fullName?: string) => {
     try {
       setState(prev => ({ ...prev, loading: true }));
-      
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -165,7 +210,28 @@ export function useAuth() {
       });
 
       if (error) {
+        // Audit failed signup attempt
+        await auditService.logEvent(
+          AUDIT_ACTIONS.USER_SIGNUP,
+          AUDIT_RESOURCES.USER,
+          { success: false, error: error.message, email },
+          undefined,
+          undefined,
+          email
+        );
         throw error;
+      }
+
+      // Audit successful signup
+      if (data.user) {
+        await auditService.logEvent(
+          AUDIT_ACTIONS.USER_SIGNUP,
+          AUDIT_RESOURCES.USER,
+          { success: true, fullName },
+          data.user.id,
+          data.user.id,
+          email
+        );
       }
 
       toast({
@@ -177,13 +243,13 @@ export function useAuth() {
     } catch (error: any) {
       console.error('Sign up error:', error);
       setState(prev => ({ ...prev, loading: false }));
-      
+
       toast({
         title: 'Sign up failed',
         description: error.message || 'An error occurred during sign up.',
         variant: 'destructive'
       });
-      
+
       throw error;
     }
   };
@@ -191,9 +257,27 @@ export function useAuth() {
   const signOut = async () => {
     try {
       setState(prev => ({ ...prev, loading: true }));
-      
+
+      // Audit logout
+      if (state.user && state.profile) {
+        await auditService.logEvent(
+          AUDIT_ACTIONS.USER_LOGOUT,
+          AUDIT_RESOURCES.USER,
+          { reason: 'user_initiated' },
+          state.profile.id,
+          state.profile.id,
+          state.user.email
+        );
+      }
+
+      // Stop inactivity timer
+      securityService.stopInactivityTimer();
+
+      // Clear secure storage
+      securityService.clearSecureStorage();
+
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         throw error;
       }
@@ -205,13 +289,13 @@ export function useAuth() {
     } catch (error: any) {
       console.error('Sign out error:', error);
       setState(prev => ({ ...prev, loading: false }));
-      
+
       toast({
         title: 'Sign out failed',
         description: error.message || 'An error occurred during sign out.',
         variant: 'destructive'
       });
-      
+
       throw error;
     }
   };
