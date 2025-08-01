@@ -79,8 +79,10 @@ export const mockAuth = {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     console.log('Mock auth attempt:', {
-      email: credentials.email,
-      availableEmails: Array.from(mockUsers.keys())
+      originalEmail: credentials.email,
+      normalizedEmail: credentials.email.toLowerCase().trim(),
+      availableEmails: Array.from(mockUsers.keys()),
+      availableNormalized: Array.from(mockUsers.keys()).map(k => k.toLowerCase())
     });
 
     // Make email lookup case-insensitive
