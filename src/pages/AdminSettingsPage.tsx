@@ -33,12 +33,6 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(false);
   const [showPasswords, setShowPasswords] = useState(false);
 
-  // Redirect non-admin users
-  if (!isAdmin) {
-    navigate('/');
-    return null;
-  }
-
   const [systemSettings, setSystemSettings] = useState({
     siteName: 'Field Engineer Portal',
     siteDescription: 'Maintenance management system',
@@ -58,6 +52,12 @@ export default function AdminSettingsPage() {
     allowGuestAccess: false,
     maxLoginAttempts: 5,
   });
+
+  // Redirect non-admin users (after all hooks are called)
+  if (!isAdmin) {
+    navigate('/');
+    return null;
+  }
 
   const handleSaveSettings = async () => {
     setLoading(true);
