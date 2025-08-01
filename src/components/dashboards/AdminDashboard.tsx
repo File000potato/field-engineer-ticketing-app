@@ -60,12 +60,24 @@ export default function AdminDashboard() {
     if (!user) return;
 
     try {
-      // Load all users
-      const allUsers = await dbHelpers.getUsers();
+      // Load all users with fallback to mock data
+      let allUsers;
+      try {
+        allUsers = await dbHelpers.getUsers();
+      } catch (supabaseError) {
+        console.log('Using mock users data');
+        allUsers = await mockDbHelpers.getUsers();
+      }
       setUsers(allUsers || []);
 
-      // Load dashboard stats
-      const dashboardData = await dbHelpers.getDashboardStats(user.id);
+      // Load dashboard stats with fallback to mock data
+      let dashboardData;
+      try {
+        dashboardData = await dbHelpers.getDashboardStats(user.id);
+      } catch (supabaseError) {
+        console.log('Using mock dashboard data');
+        dashboardData = await mockDbHelpers.getDashboardStats(user.id);
+      }
       
       // Calculate system statistics
       const thisMonth = new Date();
