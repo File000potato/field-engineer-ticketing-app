@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase, dbHelpers, subscribeToTickets } from '@/lib/supabase';
+import { mockDbHelpers } from '@/lib/mock-data';
 import { useAuth } from '@/hooks/useAuth';
 import { Ticket, Activity, TicketMedia } from '@/types/ticket';
 import { toast } from '@/components/ui/use-toast';
