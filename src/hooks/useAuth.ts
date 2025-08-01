@@ -43,7 +43,7 @@ export function useAuth() {
         }
 
         if (session?.user && mounted) {
-          const profile = await getCurrentUserProfile(session.user);
+          const profile = await getCurrentUserProfileMock(session.user);
           setState({
             user: session.user,
             profile,
