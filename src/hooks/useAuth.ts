@@ -121,22 +121,11 @@ export function useAuth() {
       // Add a small delay to prevent race conditions
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      let authResult;
-      try {
-        authResult = await authClient.auth.signInWithPassword({
-          email,
-          password,
-        });
-      } catch (authError: any) {
-        console.error('Auth client error:', authError);
-        // Fallback to main client
-        authResult = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-      }
-
-      const { data, error } = authResult;
+      console.log('Attempting sign in with minimal client...');
+      const { data, error } = await minimalSupabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
       if (error) {
         console.error('Sign in error details:', {
