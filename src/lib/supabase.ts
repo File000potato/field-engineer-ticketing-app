@@ -8,11 +8,25 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase environment variables not found, using defaults');
 }
 
+// Create a minimal auth-only client to avoid response conflicts
+export const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+    detectSessionInUrl: false,
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'field-engineer-portal-auth'
+    }
+  }
+});
+
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false, // Disable to prevent issues with URL parsing
+    detectSessionInUrl: false,
   }
 });
 
