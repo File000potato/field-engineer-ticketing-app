@@ -77,11 +77,24 @@ export const mockAuth = {
   async signInWithPassword(credentials: { email: string; password: string }) {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const mockUser = mockUsers.get(credentials.email);
-    
-    if (!mockUser || mockUser.password !== credentials.password) {
-      throw new Error('Invalid email or password');
+
+    console.log('Mock auth attempt:', {
+      email: credentials.email,
+      availableEmails: Array.from(mockUsers.keys())
+    });
+
+    // Make email lookup case-insensitive
+    const email = credentials.email.toLowerCase().trim();
+    const mockUser = mockUsers.get(email);
+
+    if (!mockUser) {
+      console.log('Available test accounts:', Array.from(mockUsers.keys()));
+      throw new Error(`Invalid email. Available test accounts: ${Array.from(mockUsers.keys()).join(', ')}`);
+    }
+
+    if (mockUser.password !== credentials.password) {
+      console.log('Password mismatch for', email, 'expected:', mockUser.password);
+      throw new Error('Invalid password');
     }
     
     if (!mockUser.profile.is_active) {
