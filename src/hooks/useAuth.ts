@@ -278,7 +278,7 @@ export function useAuth() {
       // Clear secure storage
       securityService.clearSecureStorage();
 
-      const { error } = await supabase.auth.signOut();
+      const { error } = await mockAuth.signOut();
 
       if (error) {
         throw error;
