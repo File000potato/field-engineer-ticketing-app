@@ -75,11 +75,16 @@ export default function EngineersPage() {
 
   const loadEngineersData = useCallback(async () => {
     try {
+      console.log('Loading engineers data...');
+
       // Load engineers
+      console.log('Fetching field engineers...');
       const engineersData = await dbHelpers.getUsers('field_engineer');
+      console.log('Engineers loaded:', engineersData?.length || 0);
       setEngineers(engineersData || []);
 
       // Load time entries (mock for now)
+      console.log('Creating mock time entries...');
       const mockTimeEntries: TimeEntry[] = tickets.flatMap(ticket => 
         ticket.assigned_to ? [{
           id: `time_${ticket.id}`,
