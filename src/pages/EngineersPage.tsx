@@ -164,7 +164,11 @@ export default function EngineersPage() {
 
       setEngineerPerformance(performance);
     } catch (error) {
-      console.error('Error loading engineers data:', error);
+      console.error('Error loading engineers data:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        error: error
+      });
     } finally {
       setLoading(false);
     }
