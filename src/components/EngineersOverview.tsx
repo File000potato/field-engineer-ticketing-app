@@ -110,7 +110,11 @@ export default function EngineersOverview({ onAssignTicket }: EngineersOverviewP
         await new Promise(resolve => setTimeout(resolve, 800));
         setEngineers(mockEngineers);
       } catch (error) {
-        console.error('Error loading engineers:', error);
+        console.error('Error loading engineers:', {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          error: error
+        });
       } finally {
         setLoading(false);
       }
