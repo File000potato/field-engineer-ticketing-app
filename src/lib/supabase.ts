@@ -339,6 +339,7 @@ export const dbHelpers = {
         : 0;
 
       // Get last activity
+      console.log('Fetching last activity...');
       const { data: activities, error: activitiesError } = await supabase
         .from('ticket_activities')
         .select('created_at')
@@ -346,7 +347,12 @@ export const dbHelpers = {
         .order('created_at', { ascending: false })
         .limit(1);
 
+      if (activitiesError) {
+        console.warn('Activities query error (non-fatal):', activitiesError);
+      }
+
       const lastActivity = activities?.[0]?.created_at || new Date().toISOString();
+      console.log('User stats calculation completed successfully');
 
       return {
         totalTickets,
