@@ -73,10 +73,6 @@ export default function EngineersPage() {
   const isFieldEngineer = profile?.role === 'field_engineer';
   const canViewAll = isAdmin || isSupervisor;
 
-  useEffect(() => {
-    loadEngineersData();
-  }, []);
-
   // Check permissions after all hooks
   if (!profile || !['admin', 'supervisor'].includes(profile.role)) {
     return (
@@ -91,7 +87,7 @@ export default function EngineersPage() {
     );
   }
 
-  const loadEngineersData = async () => {
+  const loadEngineersData = useCallback(async () => {
     try {
       // Load engineers
       const engineersData = await dbHelpers.getUsers('field_engineer');
@@ -186,7 +182,11 @@ export default function EngineersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tickets]);
+
+  useEffect(() => {
+    loadEngineersData();
+  }, [loadEngineersData]);
 
   // Filter and sort engineers
   const filteredEngineers = engineerPerformance.filter(ep => {
