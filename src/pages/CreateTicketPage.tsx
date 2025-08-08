@@ -57,19 +57,29 @@ export default function CreateTicketPage() {
     
     try {
       const ticketData = {
-        ...formData,
-        reportedBy: user?.email || 'Unknown',
-        mediaUrls: mediaFiles.map(f => f.name),
-        status: 'open' as const,
+        title: formData.title,
+        description: formData.description,
+        type: formData.type,
+        priority: formData.priority,
+        location: formData.location,
+        equipment_id: formData.equipmentId || undefined,
+        // Add media files information
+        metadata: {
+          mediaFiles: mediaFiles.map(f => ({
+            name: f.name,
+            type: f.type,
+            size: f.size
+          }))
+        }
       };
-      
-      const newTicket = createTicket(ticketData);
-      
+
+      const newTicket = await createTicket(ticketData);
+
       toast({
         title: 'Success',
-        description: 'Ticket created successfully',
+        description: `Ticket created successfully${mediaFiles.length > 0 ? ' with ' + mediaFiles.length + ' media files' : ''}`,
       });
-      
+
       navigate(`/tickets/${newTicket.id}`);
     } catch (error) {
       console.error('Error creating ticket:', error);
