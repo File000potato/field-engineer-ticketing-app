@@ -37,6 +37,7 @@ export default function TicketDetailPage() {
   const [newStatus, setNewStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [activities, setActivities] = useState<any[]>([]);
+  const [ticketsLoading, setTicketsLoading] = useState(true);
 
   const ticket = tickets.find(t => t.id === id);
 
@@ -47,7 +48,32 @@ export default function TicketDetailPage() {
     }
   }, [ticket, getTicketActivities]);
 
-  if (!ticket) {
+  // Monitor tickets loading state
+  React.useEffect(() => {
+    if (tickets.length > 0 || user) {
+      setTicketsLoading(false);
+    }
+  }, [tickets, user]);
+
+  // Show loading state while tickets are being loaded
+  if (ticketsLoading && !ticket) {
+    return (
+      <div className="max-w-md mx-auto p-4 text-center">
+        <Card className="p-8">
+          <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+          <h2 className="text-lg font-medium mb-2">Loading ticket...</h2>
+          <p className="text-muted-foreground">
+            Please wait while we fetch the ticket details.
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show not found only after tickets have loaded
+  if (!ticketsLoading && !ticket) {
     return (
       <div className="max-w-md mx-auto p-4 text-center">
         <Card className="p-8">
