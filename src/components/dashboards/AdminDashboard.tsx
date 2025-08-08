@@ -424,6 +424,9 @@ export default function AdminDashboard() {
         </CardContent>
       </Card>
 
+      {/* Engineers Overview */}
+      <EngineersOverview />
+
       {/* Recent User Activity */}
       <Card>
         <CardHeader>
