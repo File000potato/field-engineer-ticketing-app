@@ -347,7 +347,12 @@ export const dbHelpers = {
         lastActivity
       };
     } catch (error) {
-      console.error('Error getting user stats:', error);
+      console.error('Error getting user stats:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: userId,
+        error: error
+      });
       return {
         totalTickets: 0,
         completedTickets: 0,
