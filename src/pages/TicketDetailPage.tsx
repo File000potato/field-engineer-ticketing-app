@@ -147,7 +147,21 @@ export default function TicketDetailPage() {
     }
   };
 
-  const canUpdateStatus = isAdmin || (ticket.reportedBy === user?.email);
+  const handleDeleteTicket = async () => {
+    if (!ticket) return;
+
+    try {
+      setLoading(true);
+      await deleteTicket(ticket.id);
+      navigate('/tickets');
+    } catch (error) {
+      console.error('Error deleting ticket:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const canUpdateStatus = isAdmin || (ticket.created_by_profile?.email === user?.email);
   const canWithdraw = !isAdmin && ticket.status === 'open' && ticket.reportedBy === user?.email;
 
   const StatusIcon = getStatusIcon(ticket.status);
