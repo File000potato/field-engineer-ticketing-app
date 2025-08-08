@@ -68,7 +68,16 @@ export default function EngineersPage() {
   const [filterWorkload, setFilterWorkload] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('name');
 
-  // Check permissions
+  const isAdmin = profile?.role === 'admin';
+  const isSupervisor = profile?.role === 'supervisor';
+  const isFieldEngineer = profile?.role === 'field_engineer';
+  const canViewAll = isAdmin || isSupervisor;
+
+  useEffect(() => {
+    loadEngineersData();
+  }, []);
+
+  // Check permissions after all hooks
   if (!profile || !['admin', 'supervisor'].includes(profile.role)) {
     return (
       <div className="max-w-4xl mx-auto p-4 md:p-6 text-center">
