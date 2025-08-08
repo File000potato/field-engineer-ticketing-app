@@ -306,6 +306,21 @@ export default function TicketDetailPage() {
         </Card>
       )}
 
+      {/* Ticket Assignment (Admin/Supervisor only) */}
+      {(isAdmin || user?.email?.includes('supervisor')) && (
+        <TicketAssignment
+          ticketId={ticket.id}
+          currentAssignee={ticket.assigned_to}
+          ticketLocation={ticket.location}
+          onAssigned={() => {
+            // Refresh activities and ticket data
+            if (ticket) {
+              getTicketActivities(ticket.id).then(setActivities);
+            }
+          }}
+        />
+      )}
+
       {/* Activity Timeline */}
       <Card>
         <CardHeader>
