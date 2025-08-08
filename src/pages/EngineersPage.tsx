@@ -170,6 +170,8 @@ export default function EngineersPage() {
       });
 
       setEngineerPerformance(performance);
+      console.log('Performance metrics calculated:', performance.length);
+      console.log('Engineers data loading completed successfully');
     } catch (error) {
       console.error('Error loading engineers data:', {
         message: error instanceof Error ? error.message : String(error),
