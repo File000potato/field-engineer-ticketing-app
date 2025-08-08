@@ -24,8 +24,10 @@ export default function BottomNavigation() {
   // Count unread notifications (open + high priority tickets)
   const openTickets = tickets.filter(t => t.status === 'open').length;
   const urgentTickets = tickets.filter(t => t.priority === 'critical' || t.priority === 'high').length;
-  
-  const navItems = [
+  const isAdminOrSupervisor = profile && ['admin', 'supervisor'].includes(profile.role);
+
+  // Base navigation items for all users
+  const baseNavItems = [
     {
       path: '/',
       icon: BarChart3,
@@ -48,6 +50,32 @@ export default function BottomNavigation() {
       path: '/map',
       icon: Map,
       label: 'Map'
+    }
+  ];
+
+  // Admin/Supervisor specific navigation
+  const adminNavItems = [
+    {
+      path: '/',
+      icon: BarChart3,
+      label: 'Dashboard',
+      badge: urgentTickets > 0 ? urgentTickets : undefined
+    },
+    {
+      path: '/tickets',
+      icon: List,
+      label: 'Tickets',
+      badge: openTickets > 0 ? openTickets : undefined
+    },
+    {
+      path: '/engineers',
+      icon: Users,
+      label: 'Engineers'
+    },
+    {
+      path: '/map',
+      icon: Map,
+      label: 'Map'
     },
     {
       path: '/profile',
@@ -55,6 +83,18 @@ export default function BottomNavigation() {
       label: 'Profile'
     }
   ];
+
+  // Regular field engineer navigation
+  const fieldNavItems = [
+    ...baseNavItems,
+    {
+      path: '/profile',
+      icon: User,
+      label: 'Profile'
+    }
+  ];
+
+  const navItems = isAdminOrSupervisor ? adminNavItems : fieldNavItems;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t shadow-lg z-40">
