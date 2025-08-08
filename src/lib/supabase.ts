@@ -249,6 +249,112 @@ export const dbHelpers = {
     const { data, error } = await query;
     if (error) throw error;
     return data;
+  },
+
+  // Get user profile by ID
+  async getUserProfile(userId: string) {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Update user profile
+  async updateUserProfile(userId: string, updates: Partial<any>) {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Update user role
+  async updateUserRole(userId: string, role: 'admin' | 'supervisor' | 'field_engineer') {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .update({ role, updated_at: new Date().toISOString() })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Deactivate user
+  async deactivateUser(userId: string) {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .update({
+        is_active: false,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Get user statistics
+  async getUserStats(userId: string) {
+    try {
+      // Get tickets data
+      const { data: tickets, error: ticketsError } = await supabase
+        .from('tickets')
+        .select('*')
+        .or(`created_by.eq.${userId},assigned_to.eq.${userId}`);
+
+      if (ticketsError) throw ticketsError;
+
+      const totalTickets = tickets?.length || 0;
+      const completedTickets = tickets?.filter(t =>
+        ['resolved', 'verified', 'closed'].includes(t.status)
+      ).length || 0;
+
+      // Calculate average resolution time
+      const resolvedTickets = tickets?.filter(t => t.resolved_at) || [];
+      const avgResolutionTime = resolvedTickets.length > 0
+        ? resolvedTickets.reduce((acc, ticket) => {
+            const resolutionTime = new Date(ticket.resolved_at!).getTime() - new Date(ticket.created_at).getTime();
+            return acc + (resolutionTime / (1000 * 60 * 60)); // Convert to hours
+          }, 0) / resolvedTickets.length
+        : 0;
+
+      // Get last activity
+      const { data: activities, error: activitiesError } = await supabase
+        .from('ticket_activities')
+        .select('created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      const lastActivity = activities?.[0]?.created_at || new Date().toISOString();
+
+      return {
+        totalTickets,
+        completedTickets,
+        avgResolutionTime,
+        lastActivity
+      };
+    } catch (error) {
+      console.error('Error getting user stats:', error);
+      return {
+        totalTickets: 0,
+        completedTickets: 0,
+        avgResolutionTime: 0,
+        lastActivity: new Date().toISOString()
+      };
+    }
   }
 };
 
