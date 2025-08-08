@@ -25,6 +25,7 @@ import { dbHelpers, supabase } from '@/lib/supabase';
 import { mockDbHelpers, mockUsers } from '@/lib/mock-data';
 import { UserProfile } from '@/types/ticket';
 import { cn } from '@/lib/utils';
+import EngineersOverview from '@/components/EngineersOverview';
 
 interface SystemStats {
   total_users: number;
