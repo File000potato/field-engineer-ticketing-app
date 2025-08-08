@@ -48,6 +48,13 @@ export default function TicketsPage() {
   const canViewAllTickets = isAdmin || isSupervisor;
 
   useEffect(() => {
+    // Load engineers for admin/supervisor filters
+    if (canViewAllTickets) {
+      loadEngineers();
+    }
+  }, [canViewAllTickets]);
+
+  useEffect(() => {
     // Update URL parameters when filters change
     const params = new URLSearchParams();
     if (searchTerm) params.set('search', searchTerm);
@@ -56,6 +63,15 @@ export default function TicketsPage() {
     if (assignedFilter !== 'all') params.set('assigned_to', assignedFilter);
     setSearchParams(params);
   }, [searchTerm, statusFilter, priorityFilter, assignedFilter, setSearchParams]);
+
+  const loadEngineers = async () => {
+    try {
+      const engineersData = await dbHelpers.getUsers('field_engineer');
+      setEngineers(engineersData || []);
+    } catch (error) {
+      console.error('Error loading engineers:', error);
+    }
+  };
 
   // Filter tickets based on user role
   const getFilteredTickets = () => {
