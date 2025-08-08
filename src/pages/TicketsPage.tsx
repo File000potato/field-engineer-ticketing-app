@@ -67,7 +67,13 @@ export default function TicketsPage() {
 
   const loadEngineers = async () => {
     try {
-      const engineersData = await dbHelpers.getUsers('field_engineer');
+      let engineersData;
+      try {
+        engineersData = await dbHelpers.getUsers('field_engineer');
+      } catch (supabaseError) {
+        console.log('Supabase failed, falling back to mock data');
+        engineersData = await mockDbHelpers.getUsers('field_engineer');
+      }
       setEngineers(engineersData || []);
     } catch (error) {
       console.error('Error loading engineers:', {
