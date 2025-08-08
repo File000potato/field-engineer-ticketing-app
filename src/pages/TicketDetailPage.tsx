@@ -167,7 +167,7 @@ export default function TicketDetailPage() {
   const StatusIcon = getStatusIcon(ticket.status);
 
   return (
-    <div className="max-w-md mx-auto p-4 space-y-4 pb-20">
+    <div className="max-w-4xl mx-auto p-3 md:p-6 space-y-4 md:space-y-6 pb-20">
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => navigate('/tickets')}>
