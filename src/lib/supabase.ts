@@ -345,20 +345,27 @@ export const dbHelpers = {
           }, 0) / resolvedTickets.length
         : 0;
 
-      // Get last activity
+      // Get last activity with fallback
       console.log('Fetching last activity...');
-      const { data: activities, error: activitiesError } = await supabase
-        .from('ticket_activities')
-        .select('created_at')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(1);
+      let lastActivity;
+      try {
+        const { data: activities, error: activitiesError } = await supabase
+          .from('ticket_activities')
+          .select('created_at')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(1);
 
-      if (activitiesError) {
-        console.warn('Activities query error (non-fatal):', activitiesError);
+        if (activitiesError) {
+          console.warn('Activities query error:', activitiesError);
+          throw activitiesError;
+        }
+
+        lastActivity = activities?.[0]?.created_at || new Date().toISOString();
+      } catch (activitiesError) {
+        console.log('Activities query failed, using current time as fallback');
+        lastActivity = new Date().toISOString();
       }
-
-      const lastActivity = activities?.[0]?.created_at || new Date().toISOString();
       console.log('User stats calculation completed successfully');
 
       return {
