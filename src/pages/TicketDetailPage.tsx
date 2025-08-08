@@ -290,7 +290,7 @@ export default function TicketDetailPage() {
                         </p>
                       </div>
                       <span className="text-xs text-muted-foreground flex-shrink-0">
-                        {new Date(activity.timestamp).toLocaleString()}
+                        {new Date(activity.created_at).toLocaleString()}
                       </span>
                     </div>
                   </div>
