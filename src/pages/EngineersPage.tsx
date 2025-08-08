@@ -27,6 +27,7 @@ import {
   Target
 } from 'lucide-react';
 import { dbHelpers } from '@/lib/supabase';
+import { mockDbHelpers } from '@/lib/mock-data';
 import { UserProfile } from '@/types/ticket';
 import { cn } from '@/lib/utils';
 
