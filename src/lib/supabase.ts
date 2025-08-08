@@ -308,13 +308,21 @@ export const dbHelpers = {
   // Get user statistics
   async getUserStats(userId: string) {
     try {
+      console.log('Getting user stats for userId:', userId);
+
       // Get tickets data
+      console.log('Fetching tickets for user...');
       const { data: tickets, error: ticketsError } = await supabase
         .from('tickets')
         .select('*')
         .or(`created_by.eq.${userId},assigned_to.eq.${userId}`);
 
-      if (ticketsError) throw ticketsError;
+      if (ticketsError) {
+        console.error('Tickets query error:', ticketsError);
+        throw ticketsError;
+      }
+
+      console.log('Tickets fetched:', tickets?.length || 0);
 
       const totalTickets = tickets?.length || 0;
       const completedTickets = tickets?.filter(t =>
