@@ -99,8 +99,10 @@ export default function EngineersPage() {
         }] : []
       );
       setTimeEntries(mockTimeEntries);
+      console.log('Time entries created:', mockTimeEntries.length);
 
       // Calculate performance metrics
+      console.log('Calculating performance metrics...');
       const performance = (engineersData || []).map(engineer => {
         const assignedTickets = tickets.filter(t => t.assigned_to === engineer.id);
         const completedTickets = assignedTickets.filter(t => ['resolved', 'verified', 'closed'].includes(t.status));
