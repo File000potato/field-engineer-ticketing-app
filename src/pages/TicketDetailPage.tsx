@@ -10,19 +10,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { 
-  ArrowLeft, 
-  Clock, 
-  MapPin, 
-  User, 
-  MessageSquare, 
+import {
+  ArrowLeft,
+  Clock,
+  MapPin,
+  User,
+  MessageSquare,
   Trash2,
   Send,
   Calendar,
   AlertTriangle,
   Settings,
   CheckCircle,
-  Wrench
+  Wrench,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
