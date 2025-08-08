@@ -80,8 +80,15 @@ export default function EngineersPage() {
 
       // Load engineers
       console.log('Fetching field engineers...');
-      const engineersData = await dbHelpers.getUsers('field_engineer');
-      console.log('Engineers loaded:', engineersData?.length || 0);
+      let engineersData;
+      try {
+        engineersData = await dbHelpers.getUsers('field_engineer');
+        console.log('Engineers loaded from Supabase:', engineersData?.length || 0);
+      } catch (supabaseError) {
+        console.log('Supabase failed, falling back to mock data:', supabaseError);
+        engineersData = await mockDbHelpers.getUsers('field_engineer');
+        console.log('Engineers loaded from mock:', engineersData?.length || 0);
+      }
       setEngineers(engineersData || []);
 
       // Load time entries (mock for now)
