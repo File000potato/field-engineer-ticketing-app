@@ -298,9 +298,34 @@ export default function TicketDetailPage() {
                 </Button>
               </div>
             )}
+
+            {/* Sub-ticket creation for assigned engineers */}
+            {isAssignedEngineer && ticket.status === 'in_progress' && (
+              <div className="pt-4 border-t">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h4 className="font-medium">Issues During Maintenance?</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Create a sub-ticket for unexpected problems
+                    </p>
+                  </div>
+                  <SubTicketCreator
+                    parentTicketId={ticket.id}
+                    parentTicketTitle={ticket.title}
+                    onSubTicketCreated={() => {
+                      toast({
+                        title: 'Sub-ticket created',
+                        description: 'The issue has been reported as a sub-ticket.'
+                      });
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
             {canWithdraw && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => updateTicketStatus(ticket.id, 'closed')}
                 className="w-full"
                 disabled={loading}
