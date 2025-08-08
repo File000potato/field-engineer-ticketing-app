@@ -314,6 +314,20 @@ export const mockDbHelpers = {
     return activities;
   },
 
+  async deleteTicket(ticketId: string) {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const initialLength = currentMockTickets.length;
+    currentMockTickets = currentMockTickets.filter(t => t.id !== ticketId);
+
+    if (currentMockTickets.length === initialLength) {
+      throw new Error('Ticket not found');
+    }
+
+    return { success: true };
+  },
+
   async getDashboardStats(userId: string) {
     await new Promise(resolve => setTimeout(resolve, 200));
     return mockDashboardStats;
