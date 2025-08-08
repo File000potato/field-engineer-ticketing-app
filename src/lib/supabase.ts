@@ -310,19 +310,26 @@ export const dbHelpers = {
     try {
       console.log('Getting user stats for userId:', userId);
 
-      // Get tickets data
+      // Get tickets data with fallback
       console.log('Fetching tickets for user...');
-      const { data: tickets, error: ticketsError } = await supabase
-        .from('tickets')
-        .select('*')
-        .or(`created_by.eq.${userId},assigned_to.eq.${userId}`);
+      let tickets;
+      try {
+        const { data: ticketsData, error: ticketsError } = await supabase
+          .from('tickets')
+          .select('*')
+          .or(`created_by.eq.${userId},assigned_to.eq.${userId}`);
 
-      if (ticketsError) {
-        console.error('Tickets query error:', ticketsError);
-        throw ticketsError;
+        if (ticketsError) {
+          console.error('Tickets query error:', ticketsError);
+          throw ticketsError;
+        }
+
+        tickets = ticketsData;
+        console.log('Tickets fetched from Supabase:', tickets?.length || 0);
+      } catch (ticketsError) {
+        console.log('Supabase tickets query failed, using empty array as fallback');
+        tickets = [];
       }
-
-      console.log('Tickets fetched:', tickets?.length || 0);
 
       const totalTickets = tickets?.length || 0;
       const completedTickets = tickets?.filter(t =>
