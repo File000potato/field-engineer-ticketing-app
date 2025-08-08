@@ -163,8 +163,13 @@ export default function TicketDetailPage() {
     }
   };
 
-  const canUpdateStatus = isAdmin || (ticket.created_by_profile?.email === user?.email);
-  const canWithdraw = !isAdmin && ticket.status === 'open' && ticket.reportedBy === user?.email;
+  const canUpdateStatus = isAdmin ||
+    (ticket.created_by_profile?.email === user?.email) ||
+    (ticket.assigned_to_profile?.email === user?.email); // Allow assigned engineer to update
+
+  const canWithdraw = !isAdmin && ticket.status === 'open' && ticket.created_by_profile?.email === user?.email;
+
+  const isAssignedEngineer = ticket.assigned_to_profile?.email === user?.email;
 
   const StatusIcon = getStatusIcon(ticket.status);
 
