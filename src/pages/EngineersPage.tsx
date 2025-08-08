@@ -73,20 +73,6 @@ export default function EngineersPage() {
   const isFieldEngineer = profile?.role === 'field_engineer';
   const canViewAll = isAdmin || isSupervisor;
 
-  // Check permissions after all hooks
-  if (!profile || !['admin', 'supervisor'].includes(profile.role)) {
-    return (
-      <div className="max-w-4xl mx-auto p-4 md:p-6 text-center">
-        <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-red-500" />
-        <h2 className="text-xl font-bold mb-2">Access Denied</h2>
-        <p className="text-muted-foreground">Only administrators and supervisors can view engineer performance.</p>
-        <Button onClick={() => navigate('/')} className="mt-4">
-          Return to Dashboard
-        </Button>
-      </div>
-    );
-  }
-
   const loadEngineersData = useCallback(async () => {
     try {
       // Load engineers
