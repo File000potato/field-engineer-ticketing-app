@@ -51,15 +51,15 @@ export default function AppRouter() {
       <div className="app-container">
         <Router>
           <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-3">
-                <h1 className="text-xl font-bold text-gradient">Field Engineer Portal</h1>
-                <Badge variant={isAdmin ? "default" : "secondary"} className="text-xs">
+            <div className="flex items-center justify-between p-3 md:p-4">
+              <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+                <h1 className="text-lg md:text-xl font-bold text-gradient truncate">Field Engineer Portal</h1>
+                <Badge variant={isAdmin ? "default" : "secondary"} className="text-xs hidden sm:flex">
                   {isAdmin ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
                   {isAdmin ? 'Admin' : 'User'}
                 </Badge>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
                 <OfflineIndicator />
                 <NotificationBell />
                 <ThemeToggle />
