@@ -194,7 +194,7 @@ export default function TicketDetailPage() {
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              <span><strong>Created:</strong> {new Date(ticket.createdAt).toLocaleString()}</span>
+              <span><strong>Created:</strong> {new Date(ticket.created_at).toLocaleString()}</span>
             </div>
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
