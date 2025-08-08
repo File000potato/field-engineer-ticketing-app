@@ -91,10 +91,6 @@ export default function EngineersPage() {
     );
   }
 
-  useEffect(() => {
-    loadEngineersData();
-  }, []);
-
   const loadEngineersData = async () => {
     try {
       // Load engineers
