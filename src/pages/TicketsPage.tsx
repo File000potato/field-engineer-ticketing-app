@@ -34,6 +34,7 @@ export default function TicketsPage() {
   const { user, profile } = useAuth();
   const { tickets, loading, assignTicket } = useTickets();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [engineers, setEngineers] = useState<UserProfile[]>([]);
   
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all');
