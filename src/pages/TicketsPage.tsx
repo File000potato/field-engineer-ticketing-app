@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTickets } from '@/hooks/useTickets';
 import { useAuth } from '@/hooks/useAuth';
+import { dbHelpers } from '@/lib/supabase';
+import { UserProfile } from '@/types/ticket';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
