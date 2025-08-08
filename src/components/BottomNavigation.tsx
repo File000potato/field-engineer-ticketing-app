@@ -2,21 +2,24 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  BarChart3, 
-  List, 
-  Plus, 
-  Map, 
+import {
+  BarChart3,
+  List,
+  Plus,
+  Map,
   User,
+  Users,
   Bell
 } from 'lucide-react';
 import { useTickets } from '@/hooks/useTickets';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 export default function BottomNavigation() {
   const location = useLocation();
   const navigate = useNavigate();
   const { tickets } = useTickets();
+  const { profile } = useAuth();
   
   // Count unread notifications (open + high priority tickets)
   const openTickets = tickets.filter(t => t.status === 'open').length;
