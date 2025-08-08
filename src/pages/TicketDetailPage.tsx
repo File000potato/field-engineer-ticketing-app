@@ -79,7 +79,7 @@ export default function TicketDetailPage() {
       <div className="max-w-md mx-auto p-4 text-center">
         <Card className="p-8">
           <div className="w-12 h-12 mx-auto rounded-full bg-muted flex items-center justify-center mb-4">
-            ❌
+            ��
           </div>
           <h2 className="text-lg font-medium mb-2">Ticket not found</h2>
           <p className="text-muted-foreground mb-4">
@@ -190,10 +190,7 @@ export default function TicketDetailPage() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => {
-                  // TODO: Implement delete
-                  navigate('/tickets');
-                }}>
+                <AlertDialogAction onClick={handleDeleteTicket} disabled={loading}>
                   Delete
                 </AlertDialogAction>
               </AlertDialogFooter>
