@@ -305,7 +305,11 @@ export default function TicketsPage() {
                     <SelectContent>
                       <SelectItem value="all">All Assigned</SelectItem>
                       <SelectItem value="unassigned">Unassigned</SelectItem>
-                      {/* Add engineers list here */}
+                      {engineers.map((engineer) => (
+                        <SelectItem key={engineer.id} value={engineer.id}>
+                          {engineer.full_name || engineer.email}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 )}
