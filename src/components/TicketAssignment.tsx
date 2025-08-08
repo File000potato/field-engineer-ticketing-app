@@ -113,7 +113,11 @@ export default function TicketAssignment({
         
         setEngineers(sortedEngineers);
       } catch (error) {
-        console.error('Error loading engineers:', error);
+        console.error('Error loading engineers:', {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          error: error
+        });
       } finally {
         setLoadingEngineers(false);
       }
