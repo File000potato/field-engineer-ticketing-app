@@ -328,6 +328,42 @@ export const mockDbHelpers = {
     return { success: true };
   },
 
+  async updateTicket(ticketId: string, updates: any) {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const ticketIndex = currentMockTickets.findIndex(t => t.id === ticketId);
+    if (ticketIndex === -1) {
+      throw new Error('Ticket not found');
+    }
+
+    // Update the ticket
+    const updatedTicket = {
+      ...currentMockTickets[ticketIndex],
+      ...updates,
+      updated_at: new Date()
+    };
+
+    // If assigning to someone, fetch the profile
+    if (updates.assigned_to) {
+      const assignedProfile = mockUsers.find(u => u.id === updates.assigned_to);
+      if (assignedProfile) {
+        updatedTicket.assigned_to_profile = assignedProfile;
+      }
+    }
+
+    currentMockTickets[ticketIndex] = updatedTicket;
+    return updatedTicket;
+  },
+
+  async assignTicket(ticketId: string, assignedTo: string | null) {
+    return this.updateTicket(ticketId, {
+      assigned_to: assignedTo,
+      status: assignedTo ? 'assigned' : 'open',
+      assigned_at: assignedTo ? new Date() : null
+    });
+  },
+
   async getDashboardStats(userId: string) {
     await new Promise(resolve => setTimeout(resolve, 200));
     return mockDashboardStats;
