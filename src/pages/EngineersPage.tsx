@@ -174,6 +174,20 @@ export default function EngineersPage() {
     loadEngineersData();
   }, [loadEngineersData]);
 
+  // Check permissions after all hooks
+  if (!profile || !['admin', 'supervisor'].includes(profile.role)) {
+    return (
+      <div className="max-w-4xl mx-auto p-4 md:p-6 text-center">
+        <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+        <h2 className="text-xl font-bold mb-2">Access Denied</h2>
+        <p className="text-muted-foreground">Only administrators and supervisors can view engineer performance.</p>
+        <Button onClick={() => navigate('/')} className="mt-4">
+          Return to Dashboard
+        </Button>
+      </div>
+    );
+  }
+
   // Filter and sort engineers
   const filteredEngineers = engineerPerformance.filter(ep => {
     const matchesSearch = ep.engineer.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
