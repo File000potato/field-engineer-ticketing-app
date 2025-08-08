@@ -26,6 +26,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from '@/components/ui/use-toast';
+import TicketAssignment from '@/components/TicketAssignment';
 
 export default function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
