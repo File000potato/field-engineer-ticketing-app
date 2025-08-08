@@ -198,18 +198,18 @@ export default function TicketDetailPage() {
             </div>
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              <span><strong>Reported by:</strong> {ticket.reportedBy}</span>
+              <span><strong>Reported by:</strong> {ticket.created_by_profile?.full_name || ticket.created_by_profile?.email || 'Unknown'}</span>
             </div>
-            {ticket.assignedTo && (
+            {ticket.assigned_to_profile && (
               <div className="flex items-center gap-2">
                 <Settings className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                <span><strong>Assigned to:</strong> {ticket.assignedTo}</span>
+                <span><strong>Assigned to:</strong> {ticket.assigned_to_profile.full_name}</span>
               </div>
             )}
-            {ticket.equipmentName && (
+            {ticket.equipment && (
               <div className="flex items-center gap-2">
                 <Wrench className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                <span><strong>Equipment:</strong> {ticket.equipmentName}</span>
+                <span><strong>Equipment:</strong> {ticket.equipment.name}</span>
               </div>
             )}
           </div>
