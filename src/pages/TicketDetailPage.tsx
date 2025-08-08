@@ -28,6 +28,7 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
 import TicketAssignment from '@/components/TicketAssignment';
+import SubTicketCreator from '@/components/SubTicketCreator';
 
 export default function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
