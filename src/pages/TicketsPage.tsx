@@ -69,7 +69,11 @@ export default function TicketsPage() {
       const engineersData = await dbHelpers.getUsers('field_engineer');
       setEngineers(engineersData || []);
     } catch (error) {
-      console.error('Error loading engineers:', error);
+      console.error('Error loading engineers:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        error: error
+      });
     }
   };
 
