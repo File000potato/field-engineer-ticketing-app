@@ -188,25 +188,31 @@ const withFallback = async (supabaseOperation: () => Promise<any>, mockOperation
 export const dbHelpers = {
   // Get tickets with full relations
   async getTicketsWithRelations(userId?: string, role?: string) {
-    let query = supabase
-      .from('tickets')
-      .select(`
-        *,
-        equipment(*),
-        created_by_profile:user_profiles!tickets_created_by_fkey(*),
-        assigned_to_profile:user_profiles!tickets_assigned_to_fkey(*),
-        verified_by_profile:user_profiles!tickets_verified_by_fkey(*)
-      `)
-      .order('created_at', { ascending: false });
+    return await withFallback(
+      async () => {
+        let query = supabase
+          .from('tickets')
+          .select(`
+            *,
+            equipment(*),
+            created_by_profile:user_profiles!tickets_created_by_fkey(*),
+            assigned_to_profile:user_profiles!tickets_assigned_to_fkey(*),
+            verified_by_profile:user_profiles!tickets_verified_by_fkey(*)
+          `)
+          .order('created_at', { ascending: false });
 
-    // Apply role-based filtering (RLS will also apply)
-    if (role === 'field_engineer' && userId) {
-      query = query.or(`created_by.eq.${userId},assigned_to.eq.${userId}`);
-    }
+        // Apply role-based filtering (RLS will also apply)
+        if (role === 'field_engineer' && userId) {
+          query = query.or(`created_by.eq.${userId},assigned_to.eq.${userId}`);
+        }
 
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
+        const { data, error } = await query;
+        if (error) throw error;
+        return data;
+      },
+      () => mockDbHelpers.getTicketsWithRelations(userId, role),
+      'getTicketsWithRelations'
+    );
   },
 
   // Get ticket activities
