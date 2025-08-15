@@ -17,12 +17,11 @@ import ThemeToggle from '@/components/ThemeToggle';
 import { Loader2 } from 'lucide-react';
 
 export default function AppRouter() {
-  const { user, loading, signOut } = useAuth();
-  const { profile, loading: profileLoading, isAdmin } = useUserRole(user);
+  const { user, loading } = useAuth();
 
-  if (loading || profileLoading) {
+  if (loading) {
     return (
-      <div className="app-container flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -31,7 +30,7 @@ export default function AppRouter() {
   if (!user) {
     return (
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <div className="app-container relative">
+        <div className="h-screen flex items-center justify-center relative">
           <div className="absolute top-4 right-4 z-10">
             <ThemeToggle />
           </div>
@@ -43,46 +42,23 @@ export default function AppRouter() {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <div className="app-container">
-        <Router>
-          <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-            <div className="flex items-center justify-between p-3 md:p-4">
-              <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
-                <h1 className="text-lg md:text-xl font-bold text-gradient truncate">Field Engineer Portal</h1>
-                <Badge variant={isAdmin ? "default" : "secondary"} className="text-xs hidden sm:flex">
-                  {isAdmin ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
-                  {isAdmin ? 'Admin' : 'User'}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-                <OfflineIndicator />
-                <NotificationBell />
-                <ThemeToggle />
-                <Button variant="ghost" size="sm" onClick={signOut} className="hover:bg-destructive/10">
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </header>
-          
-          <main className="pb-safe min-h-[calc(100vh-140px)]">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/dashboard" element={<Navigate to="/" replace />} />
-              <Route path="/tickets" element={<TicketsPage />} />
-              <Route path="/tickets/:id" element={<TicketDetailPage />} />
-              <Route path="/create" element={<CreateTicketPage />} />
-              <Route path="/map" element={<MapPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/engineers" element={<EngineersPage />} />
-              <Route path="/admin/settings" element={<AdminSettingsPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          
-          <BottomNavigation />
-        </Router>
-      </div>
+      <Router>
+        <Routes>
+          <Route path="/" element={<AppLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Navigate to="/" replace />} />
+            <Route path="tickets" element={<TicketsPage />} />
+            <Route path="tickets/:id" element={<TicketDetailPage />} />
+            <Route path="create" element={<CreateTicketPage />} />
+            <Route path="map" element={<MapPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="profile/:userId" element={<ProfilePage />} />
+            <Route path="engineers" element={<EngineersPage />} />
+            <Route path="admin/settings" element={<AdminSettingsPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </Router>
     </ThemeProvider>
   );
 }
