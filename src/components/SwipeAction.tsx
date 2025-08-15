@@ -154,7 +154,7 @@ export default function SwipeAction({
         >
           {dragDistance > actionThreshold / 2 && (
             <div className="flex items-center gap-2 text-white px-4">
-              <leftActions[0].icon className="w-5 h-5" />
+              {React.createElement(leftActions[0].icon, { className: "w-5 h-5" })}
               <span className="text-sm font-medium">{leftActions[0].label}</span>
             </div>
           )}
@@ -173,7 +173,7 @@ export default function SwipeAction({
         >
           {dragDistance < -actionThreshold / 2 && (
             <div className="flex items-center gap-2 text-white px-4">
-              <rightActions[0].icon className="w-5 h-5" />
+              {React.createElement(rightActions[0].icon, { className: "w-5 h-5" })}
               <span className="text-sm font-medium">{rightActions[0].label}</span>
             </div>
           )}
