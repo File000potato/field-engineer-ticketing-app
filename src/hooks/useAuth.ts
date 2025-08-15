@@ -35,7 +35,13 @@ export function useAuth() {
         const { data: { session }, error } = await mockAuth.getSession();
         
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('Error getting session:', {
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+            code: error?.code,
+            status: error?.status,
+            error: error
+          });
           if (mounted) {
             setState(prev => ({ ...prev, loading: false, initialized: true }));
           }
@@ -59,7 +65,11 @@ export function useAuth() {
           });
         }
       } catch (error) {
-        console.error('Error in getInitialSession:', error);
+        console.error('Error in getInitialSession:', {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          error: error
+        });
         if (mounted) {
           setState({
             user: null,
@@ -90,7 +100,13 @@ export function useAuth() {
               initialized: true
             });
           } catch (error) {
-            console.error('Error getting profile after auth change:', error);
+            console.error('Error getting profile after auth change:', {
+              message: error instanceof Error ? error.message : String(error),
+              stack: error instanceof Error ? error.stack : undefined,
+              userId: session?.user?.id,
+              userEmail: session?.user?.email,
+              error: error
+            });
             setState({
               user: session.user,
               profile: null,
@@ -184,7 +200,14 @@ export function useAuth() {
 
       return data;
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error('Sign in error:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        code: error?.code,
+        status: error?.status,
+        email: email,
+        error: error
+      });
       setState(prev => ({ ...prev, loading: false }));
 
       toast({
@@ -243,7 +266,14 @@ export function useAuth() {
 
       return data;
     } catch (error: any) {
-      console.error('Sign up error:', error);
+      console.error('Sign up error:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        code: error?.code,
+        status: error?.status,
+        email: email,
+        error: error
+      });
       setState(prev => ({ ...prev, loading: false }));
 
       toast({
@@ -289,7 +319,13 @@ export function useAuth() {
         description: 'You have been signed out successfully.',
       });
     } catch (error: any) {
-      console.error('Sign out error:', error);
+      console.error('Sign out error:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: state.user?.id,
+        userEmail: state.user?.email,
+        error: error
+      });
       setState(prev => ({ ...prev, loading: false }));
 
       toast({
@@ -327,7 +363,13 @@ export function useAuth() {
 
       return data;
     } catch (error: any) {
-      console.error('Profile update error:', error);
+      console.error('Profile update error:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: state.user?.id,
+        updates: updates,
+        error: error
+      });
       
       toast({
         title: 'Update failed',
@@ -347,7 +389,12 @@ export function useAuth() {
       setState(prev => ({ ...prev, profile }));
       return profile;
     } catch (error) {
-      console.error('Error refreshing profile:', error);
+      console.error('Error refreshing profile:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: state.user?.id,
+        error: error
+      });
       return null;
     }
   };

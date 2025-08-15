@@ -51,7 +51,12 @@ export const useTimeTracking = (ticketId?: string) => {
         loading: false 
       }));
     } catch (error) {
-      console.error('Error loading time entries:', error);
+      console.error('Error loading time entries:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: userId,
+        error: error
+      });
       setState(prev => ({ 
         ...prev, 
         error: 'Failed to load time entries', 
@@ -135,7 +140,13 @@ export const useTimeTracking = (ticketId?: string) => {
 
       return savedEntry;
     } catch (error) {
-      console.error('Error saving time entry:', error);
+      console.error('Error saving time entry:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        entry: entry,
+        userId: userId,
+        error: error
+      });
       setState(prev => ({ 
         ...prev, 
         error: 'Failed to save time entry', 
@@ -215,7 +226,14 @@ export const useTimeTracking = (ticketId?: string) => {
 
       return updatedEntry;
     } catch (error) {
-      console.error('Error updating time entry:', error);
+      console.error('Error updating time entry:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        entryId: entryId,
+        updates: updates,
+        userId: userId,
+        error: error
+      });
       setState(prev => ({ 
         ...prev, 
         error: 'Failed to update time entry', 
@@ -248,7 +266,13 @@ export const useTimeTracking = (ticketId?: string) => {
         description: 'Time entry has been deleted successfully.',
       });
     } catch (error) {
-      console.error('Error deleting time entry:', error);
+      console.error('Error deleting time entry:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        entryId: entryId,
+        userId: userId,
+        error: error
+      });
       setState(prev => ({ 
         ...prev, 
         error: 'Failed to delete time entry', 
@@ -277,7 +301,12 @@ export const useTimeTracking = (ticketId?: string) => {
           }
         }));
       } catch (error) {
-        console.error('Error restoring time session:', error);
+        console.error('Error restoring time session:', {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          userId: userId,
+          error: error
+        });
         localStorage.removeItem('activeTimeSession');
       }
     }

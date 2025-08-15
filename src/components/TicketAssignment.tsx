@@ -116,6 +116,8 @@ export default function TicketAssignment({
         console.error('Error loading engineers:', {
           message: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
+          component: 'TicketAssignment',
+          operation: 'loadEngineers',
           error: error
         });
       } finally {
@@ -148,7 +150,14 @@ export default function TicketAssignment({
 
       onAssigned?.();
     } catch (error) {
-      console.error('Error assigning ticket:', error);
+      console.error('Error assigning ticket:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        ticketId: ticketId,
+        engineerId: engineerId,
+        component: 'TicketAssignment',
+        error: error
+      });
       toast({
         title: 'Assignment failed',
         description: 'Failed to assign ticket. Please try again.',

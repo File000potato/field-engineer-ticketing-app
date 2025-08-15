@@ -69,7 +69,13 @@ export const useTickets = () => {
       
       setTickets(transformedTickets);
     } catch (err: any) {
-      console.error('Error loading tickets:', err);
+      console.error('Error loading tickets:', {
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+        userId: user?.id,
+        userRole: profile?.role,
+        error: err
+      });
       setError(err.message);
       toast({
         title: 'Error loading tickets',
@@ -144,7 +150,13 @@ export const useTickets = () => {
 
       return transformedTicket;
     } catch (error: any) {
-      console.error('Error creating ticket:', error);
+      console.error('Error creating ticket:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        ticketData: ticketData,
+        userId: user?.id,
+        error: error
+      });
       toast({
         title: 'Failed to create ticket',
         description: error.message || 'An error occurred while creating the ticket.',
@@ -226,7 +238,14 @@ export const useTickets = () => {
 
       return transformedTicket;
     } catch (error: any) {
-      console.error('Error updating ticket:', error);
+      console.error('Error updating ticket:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        ticketId: ticketId,
+        updates: updates,
+        userId: user?.id,
+        error: error
+      });
       toast({
         title: 'Failed to update ticket',
         description: error.message || 'An error occurred while updating the ticket.',
@@ -260,7 +279,13 @@ export const useTickets = () => {
         description: 'The ticket has been deleted successfully.',
       });
     } catch (error: any) {
-      console.error('Error deleting ticket:', error);
+      console.error('Error deleting ticket:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        ticketId: ticketId,
+        userId: user?.id,
+        error: error
+      });
       toast({
         title: 'Failed to delete ticket',
         description: error.message || 'An error occurred while deleting the ticket.',
@@ -298,7 +323,14 @@ export const useTickets = () => {
         description: 'Your comment has been added to the ticket.',
       });
     } catch (error: any) {
-      console.error('Error adding comment:', error);
+      console.error('Error adding comment:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        ticketId: ticketId,
+        comment: comment,
+        userId: user?.id,
+        error: error
+      });
       toast({
         title: 'Failed to add comment',
         description: error.message || 'An error occurred while adding the comment.',
@@ -324,7 +356,12 @@ export const useTickets = () => {
         created_at: new Date(activity.created_at),
       }));
     } catch (error: any) {
-      console.error('Error loading ticket activities:', error);
+      console.error('Error loading ticket activities:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        ticketId: ticketId,
+        error: error
+      });
       toast({
         title: 'Failed to load activities',
         description: error.message || 'An error occurred while loading ticket activities.',
@@ -343,7 +380,12 @@ export const useTickets = () => {
         created_at: new Date(media.created_at),
       }));
     } catch (error: any) {
-      console.error('Error loading ticket media:', error);
+      console.error('Error loading ticket media:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        ticketId: ticketId,
+        error: error
+      });
       toast({
         title: 'Failed to load media',
         description: error.message || 'An error occurred while loading ticket media.',
