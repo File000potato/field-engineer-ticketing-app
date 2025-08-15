@@ -8,6 +8,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase environment variables not found, using defaults');
 }
 
+// Global flag to track if Supabase is available
+let supabaseAvailable = true;
+
+// Function to check Supabase connectivity
+const checkSupabaseConnection = async () => {
+  try {
+    const { data, error } = await supabase.from('user_profiles').select('count', { count: 'exact', head: true });
+    if (error) throw error;
+    console.log('Supabase connection verified');
+    return true;
+  } catch (error) {
+    console.warn('Supabase connection failed, switching to mock data mode:', error);
+    supabaseAvailable = false;
+    return false;
+  }
+};
+
+// Check connection on module load
+checkSupabaseConnection();
+
 // Create a minimal auth-only client to avoid response conflicts
 export const authClient = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
