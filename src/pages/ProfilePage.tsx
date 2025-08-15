@@ -76,22 +76,38 @@ export default function ProfilePage() {
   const loadProfile = async () => {
     try {
       setLoading(true);
-      
+      console.log('Loading profile...', { userId, isViewingOwnProfile, isAdmin });
+
       if (isViewingOwnProfile) {
+        console.log('Loading own profile...');
         setProfile(currentUserProfile);
         setEditedProfile(currentUserProfile || {});
       } else if (userId && isAdmin) {
-        // Load other user's profile (admin only)
-        const userProfile = await dbHelpers.getUserProfile(userId);
-        setProfile(userProfile);
-        setEditedProfile(userProfile || {});
+        console.log('Loading other user profile...', userId);
+        try {
+          const userProfile = await dbHelpers.getUserProfile(userId);
+          console.log('User profile loaded:', userProfile);
+          setProfile(userProfile);
+          setEditedProfile(userProfile || {});
+        } catch (profileError) {
+          console.error('Error loading user profile:', profileError);
+          throw profileError;
+        }
       }
 
       // Load user statistics
-      if (profile || currentUserProfile) {
+      const targetProfile = profile || currentUserProfile;
+      if (targetProfile) {
         const targetUserId = userId || user?.id;
-        const stats = await dbHelpers.getUserStats(targetUserId);
-        setUserStats(stats);
+        console.log('Loading user stats for:', targetUserId);
+        try {
+          const stats = await dbHelpers.getUserStats(targetUserId);
+          console.log('User stats loaded:', stats);
+          setUserStats(stats);
+        } catch (statsError) {
+          console.warn('Error loading user stats (non-fatal):', statsError);
+          // Don't throw - stats loading failure shouldn't break profile loading
+        }
       }
     } catch (error) {
       console.error('Error loading profile:', {
