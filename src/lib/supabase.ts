@@ -165,6 +165,25 @@ export const subscribeToNotifications = (
     .subscribe();
 };
 
+// Import mock helpers for fallback
+import { mockDbHelpers } from './mock-data';
+
+// Wrapper function that automatically falls back to mock data
+const withFallback = async (supabaseOperation: () => Promise<any>, mockOperation: () => Promise<any>, operationName: string) => {
+  if (!supabaseAvailable) {
+    console.log(`Using mock data for ${operationName} (Supabase unavailable)`);
+    return await mockOperation();
+  }
+
+  try {
+    return await supabaseOperation();
+  } catch (error) {
+    console.warn(`Supabase ${operationName} failed, falling back to mock data:`, error);
+    supabaseAvailable = false; // Disable Supabase for future calls
+    return await mockOperation();
+  }
+};
+
 // Database helper functions
 export const dbHelpers = {
   // Get tickets with full relations
