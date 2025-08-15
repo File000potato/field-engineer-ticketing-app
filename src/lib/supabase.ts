@@ -275,19 +275,25 @@ export const dbHelpers = {
 
   // Get users for assignment
   async getUsers(role?: string) {
-    let query = supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('is_active', true)
-      .order('full_name');
+    return await withFallback(
+      async () => {
+        let query = supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('is_active', true)
+          .order('full_name');
 
-    if (role) {
-      query = query.eq('role', role);
-    }
+        if (role) {
+          query = query.eq('role', role);
+        }
 
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
+        const { data, error } = await query;
+        if (error) throw error;
+        return data;
+      },
+      () => mockDbHelpers.getUsers(role),
+      'getUsers'
+    );
   },
 
   // Get user profile by ID
