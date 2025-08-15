@@ -9,18 +9,12 @@ import ProfilePage from '@/pages/ProfilePage';
 import AdminSettingsPage from '@/pages/AdminSettingsPage';
 import EngineersPage from '@/pages/EngineersPage';
 import NotFound from '@/pages/NotFound';
-import BottomNavigation from '@/components/BottomNavigation';
+import AppLayout from '@/components/AppLayout';
 import { useAuth } from '@/hooks/useAuth';
 import AuthForm from '@/components/AuthForm';
 import { ThemeProvider } from '@/components/theme-provider';
 import ThemeToggle from '@/components/ThemeToggle';
-import OfflineIndicator from '@/components/OfflineIndicator';
-import { Button } from '@/components/ui/button';
-import { LogOut, Shield, User } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { useUserRole } from '@/hooks/useUserRole';
-import NotificationBell from '@/components/NotificationBell';
 
 export default function AppRouter() {
   const { user, loading, signOut } = useAuth();
