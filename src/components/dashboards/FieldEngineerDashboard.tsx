@@ -6,18 +6,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Clock, 
-  CheckCircle, 
-  AlertTriangle, 
+import {
+  Clock,
+  CheckCircle,
+  AlertTriangle,
   Wrench,
   MapPin,
   Calendar,
   TrendingUp,
   Target,
   Timer,
-  Award
+  Award,
+  BarChart3,
+  Activity
 } from 'lucide-react';
+import SimpleBarChart from '@/components/charts/SimpleBarChart';
+import DonutChart from '@/components/charts/DonutChart';
+import SimpleLineChart from '@/components/charts/SimpleLineChart';
 import { dbHelpers } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
