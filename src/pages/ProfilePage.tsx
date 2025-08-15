@@ -94,7 +94,13 @@ export default function ProfilePage() {
         setUserStats(stats);
       }
     } catch (error) {
-      console.error('Error loading profile:', error);
+      console.error('Error loading profile:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: userId,
+        isViewingOwnProfile: isViewingOwnProfile,
+        error: error
+      });
       toast({
         title: 'Error',
         description: 'Failed to load profile information.',
