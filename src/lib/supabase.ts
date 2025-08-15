@@ -328,15 +328,21 @@ export const dbHelpers = {
 
   // Update user profile
   async updateUserProfile(userId: string, updates: Partial<any>) {
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .update(updates)
-      .eq('id', userId)
-      .select()
-      .single();
+    return await withFallback(
+      async () => {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .update(updates)
+          .eq('id', userId)
+          .select()
+          .single();
 
-    if (error) throw error;
-    return data;
+        if (error) throw error;
+        return data;
+      },
+      () => mockDbHelpers.updateUserProfile(userId, updates),
+      'updateUserProfile'
+    );
   },
 
   // Update user role
