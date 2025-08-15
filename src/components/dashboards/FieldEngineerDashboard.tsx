@@ -120,7 +120,7 @@ export default function FieldEngineerDashboard() {
   }
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2">
         <h1 className="text-2xl font-bold">Field Engineer Dashboard</h1>
