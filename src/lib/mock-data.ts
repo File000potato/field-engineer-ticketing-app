@@ -395,5 +395,43 @@ export const mockDbHelpers = {
       return mockUsers[userIndex];
     }
     return null;
+  },
+
+  async getUserStats(userId: string) {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    console.log('Getting user stats from mock data for userId:', userId);
+
+    // Filter tickets for this user
+    const userTickets = currentMockTickets.filter(t =>
+      t.created_by === userId || t.assigned_to === userId
+    );
+
+    const totalTickets = userTickets.length;
+    const completedTickets = userTickets.filter(t =>
+      ['resolved', 'verified', 'closed'].includes(t.status)
+    ).length;
+
+    // Calculate average resolution time
+    const resolvedTickets = userTickets.filter(t => t.status === 'resolved' || t.status === 'verified' || t.status === 'closed');
+    const avgResolutionTime = resolvedTickets.length > 0
+      ? resolvedTickets.reduce((acc, ticket) => {
+          // Mock resolution time calculation (2-24 hours)
+          const mockResolutionHours = Math.random() * 22 + 2;
+          return acc + mockResolutionHours;
+        }, 0) / resolvedTickets.length
+      : 0;
+
+    const lastActivity = new Date().toISOString();
+
+    console.log('Mock user stats calculated:', { totalTickets, completedTickets, avgResolutionTime });
+
+    return {
+      totalTickets,
+      completedTickets,
+      avgResolutionTime,
+      lastActivity
+    };
   }
 };
