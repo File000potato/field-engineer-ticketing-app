@@ -380,5 +380,10 @@ export const mockDbHelpers = {
   async getEquipment() {
     await new Promise(resolve => setTimeout(resolve, 200));
     return mockTickets.map(t => t.equipment).filter(e => e);
+  },
+
+  async getUserProfile(userId: string) {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return mockUsers.find(u => u.id === userId) || null;
   }
 };
