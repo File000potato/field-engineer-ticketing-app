@@ -260,11 +260,17 @@ export const dbHelpers = {
 
   // Get dashboard stats
   async getDashboardStats(userId: string) {
-    const { data, error } = await supabase
-      .rpc('get_dashboard_stats', { user_uuid: userId });
+    return await withFallback(
+      async () => {
+        const { data, error } = await supabase
+          .rpc('get_dashboard_stats', { user_uuid: userId });
 
-    if (error) throw error;
-    return data?.[0];
+        if (error) throw error;
+        return data?.[0];
+      },
+      () => mockDbHelpers.getDashboardStats(userId),
+      'getDashboardStats'
+    );
   },
 
   // Get equipment list
