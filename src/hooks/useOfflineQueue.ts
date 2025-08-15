@@ -30,7 +30,13 @@ export const useOfflineQueue = () => {
         setQueue(parsedQueue);
       }
     } catch (error) {
-      console.error('Error loading offline queue:', error);
+      console.error('Error loading offline queue:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        hook: 'useOfflineQueue',
+        operation: 'loadQueue',
+        error: error
+      });
     }
   }, []);
 
@@ -39,7 +45,14 @@ export const useOfflineQueue = () => {
     try {
       localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(queue));
     } catch (error) {
-      console.error('Error saving offline queue:', error);
+      console.error('Error saving offline queue:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        queueLength: queue.length,
+        hook: 'useOfflineQueue',
+        operation: 'saveQueue',
+        error: error
+      });
     }
   }, [queue]);
 

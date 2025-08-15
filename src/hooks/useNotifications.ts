@@ -33,7 +33,13 @@ export const useNotifications = () => {
         setNotifications(parsedNotifications);
       }
     } catch (error) {
-      console.error('Error loading notifications:', error);
+      console.error('Error loading notifications:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        hook: 'useNotifications',
+        operation: 'loadNotifications',
+        error: error
+      });
     }
   }, []);
 
@@ -42,7 +48,14 @@ export const useNotifications = () => {
     try {
       localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(notifications));
     } catch (error) {
-      console.error('Error saving notifications:', error);
+      console.error('Error saving notifications:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        notificationsCount: notifications.length,
+        hook: 'useNotifications',
+        operation: 'saveNotifications',
+        error: error
+      });
     }
   }, [notifications]);
 
