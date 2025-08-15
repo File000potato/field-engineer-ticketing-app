@@ -376,13 +376,11 @@ export const dbHelpers = {
 
   // Get user statistics
   async getUserStats(userId: string) {
-    try {
-      console.log('Getting user stats for userId:', userId);
+    return await withFallback(
+      async () => {
+        console.log('Getting user stats for userId (Supabase):', userId);
 
-      // Get tickets data with fallback
-      console.log('Fetching tickets for user...');
-      let tickets;
-      try {
+        // Get tickets data
         const { data: ticketsData, error: ticketsError } = await supabase
           .from('tickets')
           .select('*')
@@ -401,74 +399,51 @@ export const dbHelpers = {
           throw ticketsError;
         }
 
-        tickets = ticketsData;
-        console.log('Tickets fetched from Supabase:', tickets?.length || 0);
-      } catch (ticketsError) {
-        console.log('Supabase tickets query failed, using empty array as fallback:', {
-          message: ticketsError instanceof Error ? ticketsError.message : String(ticketsError),
-          code: ticketsError?.code,
-          userId: userId
-        });
-        tickets = [];
-      }
+        const tickets = ticketsData || [];
+        console.log('Tickets fetched from Supabase:', tickets.length);
 
-      const totalTickets = tickets?.length || 0;
-      const completedTickets = tickets?.filter(t =>
-        ['resolved', 'verified', 'closed'].includes(t.status)
-      ).length || 0;
+        const totalTickets = tickets.length;
+        const completedTickets = tickets.filter(t =>
+          ['resolved', 'verified', 'closed'].includes(t.status)
+        ).length;
 
-      // Calculate average resolution time
-      const resolvedTickets = tickets?.filter(t => t.resolved_at) || [];
-      const avgResolutionTime = resolvedTickets.length > 0
-        ? resolvedTickets.reduce((acc, ticket) => {
-            const resolutionTime = new Date(ticket.resolved_at!).getTime() - new Date(ticket.created_at).getTime();
-            return acc + (resolutionTime / (1000 * 60 * 60)); // Convert to hours
-          }, 0) / resolvedTickets.length
-        : 0;
+        // Calculate average resolution time
+        const resolvedTickets = tickets.filter(t => t.resolved_at);
+        const avgResolutionTime = resolvedTickets.length > 0
+          ? resolvedTickets.reduce((acc, ticket) => {
+              const resolutionTime = new Date(ticket.resolved_at!).getTime() - new Date(ticket.created_at).getTime();
+              return acc + (resolutionTime / (1000 * 60 * 60)); // Convert to hours
+            }, 0) / resolvedTickets.length
+          : 0;
 
-      // Get last activity with fallback
-      console.log('Fetching last activity...');
-      let lastActivity;
-      try {
-        const { data: activities, error: activitiesError } = await supabase
-          .from('ticket_activities')
-          .select('created_at')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-          .limit(1);
+        // Get last activity
+        let lastActivity = new Date().toISOString();
+        try {
+          const { data: activities, error: activitiesError } = await supabase
+            .from('ticket_activities')
+            .select('created_at')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(1);
 
-        if (activitiesError) {
-          console.warn('Activities query error:', activitiesError);
-          throw activitiesError;
+          if (!activitiesError && activities?.[0]) {
+            lastActivity = activities[0].created_at;
+          }
+        } catch (activitiesError) {
+          console.log('Activities query failed, using current time');
         }
 
-        lastActivity = activities?.[0]?.created_at || new Date().toISOString();
-      } catch (activitiesError) {
-        console.log('Activities query failed, using current time as fallback');
-        lastActivity = new Date().toISOString();
-      }
-      console.log('User stats calculation completed successfully');
-
-      return {
-        totalTickets,
-        completedTickets,
-        avgResolutionTime,
-        lastActivity
-      };
-    } catch (error) {
-      console.error('Error getting user stats:', {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        userId: userId,
-        error: error
-      });
-      return {
-        totalTickets: 0,
-        completedTickets: 0,
-        avgResolutionTime: 0,
-        lastActivity: new Date().toISOString()
-      };
-    }
+        console.log('User stats calculated from Supabase successfully');
+        return {
+          totalTickets,
+          completedTickets,
+          avgResolutionTime,
+          lastActivity
+        };
+      },
+      () => mockDbHelpers.getUserStats(userId),
+      'getUserStats'
+    );
   },
 
   // Time tracking functions
