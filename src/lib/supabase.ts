@@ -404,7 +404,11 @@ export const dbHelpers = {
         tickets = ticketsData;
         console.log('Tickets fetched from Supabase:', tickets?.length || 0);
       } catch (ticketsError) {
-        console.log('Supabase tickets query failed, using empty array as fallback');
+        console.log('Supabase tickets query failed, using empty array as fallback:', {
+          message: ticketsError instanceof Error ? ticketsError.message : String(ticketsError),
+          code: ticketsError?.code,
+          userId: userId
+        });
         tickets = [];
       }
 
