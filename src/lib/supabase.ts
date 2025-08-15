@@ -389,7 +389,15 @@ export const dbHelpers = {
           .or(`created_by.eq.${userId},assigned_to.eq.${userId}`);
 
         if (ticketsError) {
-          console.error('Tickets query error:', ticketsError);
+          console.error('Tickets query error:', {
+            message: ticketsError instanceof Error ? ticketsError.message : String(ticketsError),
+            stack: ticketsError instanceof Error ? ticketsError.stack : undefined,
+            code: ticketsError?.code,
+            details: ticketsError?.details,
+            hint: ticketsError?.hint,
+            userId: userId,
+            error: ticketsError
+          });
           throw ticketsError;
         }
 
