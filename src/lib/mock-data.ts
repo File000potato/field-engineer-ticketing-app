@@ -385,5 +385,15 @@ export const mockDbHelpers = {
   async getUserProfile(userId: string) {
     await new Promise(resolve => setTimeout(resolve, 200));
     return mockUsers.find(u => u.id === userId) || null;
+  },
+
+  async updateUserProfile(userId: string, updates: Partial<any>) {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    const userIndex = mockUsers.findIndex(u => u.id === userId);
+    if (userIndex >= 0) {
+      mockUsers[userIndex] = { ...mockUsers[userIndex], ...updates };
+      return mockUsers[userIndex];
+    }
+    return null;
   }
 };
