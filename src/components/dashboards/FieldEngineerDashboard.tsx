@@ -256,6 +256,73 @@ export default function FieldEngineerDashboard() {
         </CardContent>
       </Card>
 
+      {/* Analytics Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <DonutChart
+          title="Tickets by Priority"
+          data={priorityData}
+          centerText="Total"
+          centerValue={myAssignedTickets.length}
+        />
+
+        <DonutChart
+          title="Tickets by Status"
+          data={statusData}
+          centerText="Assigned"
+          centerValue={myAssignedTickets.length}
+        />
+
+        <SimpleLineChart
+          title="Weekly Activity"
+          data={weeklyData}
+          color="#2563eb"
+        />
+      </div>
+
+      {/* Performance Overview */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <BarChart3 className="w-5 h-5" />
+            Performance Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SimpleBarChart
+              title="This Month's Progress"
+              data={[
+                { label: 'Completed', value: completedTickets, color: '#16a34a' },
+                { label: 'In Progress', value: myAssignedTickets.filter(t => t.status === 'in_progress').length, color: '#ea580c' },
+                { label: 'Pending', value: myAssignedTickets.filter(t => t.status === 'open').length, color: '#2563eb' }
+              ]}
+            />
+
+            <div className="space-y-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h4 className="font-medium mb-2">Performance Metrics</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Completion Rate</span>
+                    <span className="font-medium">{completionRate.toFixed(1)}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Avg Resolution Time</span>
+                    <span className="font-medium">
+                      {stats?.avg_resolution_hours ? `${stats.avg_resolution_hours.toFixed(1)}h` : '0h'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Critical Priority</span>
+                    <span className="font-medium text-red-600">{criticalAssigned}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Priority Alerts */}
       {(criticalAssigned > 0 || overdueTickets.length > 0) && (
         <Card className="border-red-200 dark:border-red-800">
