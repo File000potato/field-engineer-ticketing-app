@@ -310,14 +310,20 @@ export const dbHelpers = {
 
   // Get user profile by ID
   async getUserProfile(userId: string) {
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    return await withFallback(
+      async () => {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
 
-    if (error) throw error;
-    return data;
+        if (error) throw error;
+        return data;
+      },
+      () => mockDbHelpers.getUserProfile(userId),
+      'getUserProfile'
+    );
   },
 
   // Update user profile
