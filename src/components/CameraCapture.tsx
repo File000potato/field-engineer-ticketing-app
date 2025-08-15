@@ -74,7 +74,13 @@ export default function CameraCapture({
       });
       
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error('Error accessing camera:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: 'CameraCapture',
+        operation: 'startCamera',
+        error: error
+      });
       toast({
         title: 'Camera error',
         description: 'Could not access camera. Please check permissions.',
@@ -111,7 +117,13 @@ export default function CameraCapture({
         });
         setFlashEnabled(!flashEnabled);
       } catch (error) {
-        console.error('Error toggling flash:', error);
+        console.error('Error toggling flash:', {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          component: 'CameraCapture',
+          operation: 'toggleFlash',
+          error: error
+        });
       }
     }
   };

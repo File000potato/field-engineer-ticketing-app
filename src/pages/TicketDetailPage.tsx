@@ -158,7 +158,13 @@ export default function TicketDetailPage() {
       await deleteTicket(ticket.id);
       navigate('/tickets');
     } catch (error) {
-      console.error('Error deleting ticket:', error);
+      console.error('Error deleting ticket:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        ticketId: id,
+        component: 'TicketDetailPage',
+        error: error
+      });
     } finally {
       setLoading(false);
     }

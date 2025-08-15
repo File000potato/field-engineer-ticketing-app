@@ -138,7 +138,13 @@ export default function BarcodeScanner({
       });
       
     } catch (error) {
-      console.error('Error starting scanner:', error);
+      console.error('Error starting scanner:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: 'BarcodeScanner',
+        operation: 'startScanning',
+        error: error
+      });
       setError('Could not access camera. Please check permissions.');
       toast({
         title: 'Scanner error',
@@ -180,7 +186,13 @@ export default function BarcodeScanner({
       });
       setFlashEnabled(!flashEnabled);
     } catch (error) {
-      console.error('Error toggling flash:', error);
+      console.error('Error toggling flash:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: 'BarcodeScanner',
+        operation: 'toggleFlash',
+        error: error
+      });
     }
   };
 

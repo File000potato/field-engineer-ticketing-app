@@ -82,7 +82,13 @@ export default function CreateTicketPage() {
 
       navigate(`/tickets/${newTicket.id}`);
     } catch (error) {
-      console.error('Error creating ticket:', error);
+      console.error('Error creating ticket:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        formData: formData,
+        component: 'CreateTicketPage',
+        error: error
+      });
       toast({
         title: 'Error',
         description: 'Failed to create ticket. Please try again.',
@@ -105,7 +111,13 @@ export default function CreateTicketPage() {
           }));
         },
         (error) => {
-          console.error('Error getting location:', error);
+          console.error('Error getting location:', {
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+            component: 'CreateTicketPage',
+            operation: 'getCurrentPosition',
+            error: error
+          });
           toast({
             title: 'Location Error',
             description: 'Unable to get current location',
