@@ -134,7 +134,13 @@ export default function VoiceRecorder({
       });
       
     } catch (error) {
-      console.error('Error starting recording:', error);
+      console.error('Error starting recording:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: 'VoiceRecorder',
+        operation: 'startRecording',
+        error: error
+      });
       toast({
         title: 'Recording failed',
         description: 'Could not access microphone. Please check permissions.',

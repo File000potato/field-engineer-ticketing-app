@@ -41,7 +41,13 @@ export default function CreateTicketForm({ onSubmit, onCancel }: CreateTicketFor
       
       onSubmit(ticketData);
     } catch (error) {
-      console.error('Error creating ticket:', error);
+      console.error('Error creating ticket:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        formData: formData,
+        component: 'CreateTicketForm',
+        error: error
+      });
     } finally {
       setLoading(false);
     }

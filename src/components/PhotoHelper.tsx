@@ -82,7 +82,13 @@ export default function PhotoHelper({
         videoRef.current.play();
       }
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error('Error accessing camera:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: 'PhotoHelper',
+        operation: 'startCamera',
+        error: error
+      });
       // Fallback to file input
       fileInputRef.current?.click();
     }

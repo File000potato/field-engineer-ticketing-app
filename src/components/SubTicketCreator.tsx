@@ -100,7 +100,18 @@ export default function SubTicketCreator({
       onSubTicketCreated?.(newSubTicket);
       
     } catch (error) {
-      console.error('Error creating sub-ticket:', error);
+      console.error('Error creating sub-ticket:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        parentTicketId: parentTicketId,
+        subTicketData: {
+          title: title,
+          description: description,
+          priority: priority
+        },
+        component: 'SubTicketCreator',
+        error: error
+      });
       toast({
         title: 'Error',
         description: 'Failed to create sub-ticket. Please try again.',
