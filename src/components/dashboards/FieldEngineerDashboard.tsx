@@ -85,6 +85,32 @@ export default function FieldEngineerDashboard() {
   const completedTickets = myAssignedTickets.filter(t => ['resolved', 'verified', 'closed'].includes(t.status)).length;
   const completionRate = myAssignedTickets.length > 0 ? (completedTickets / myAssignedTickets.length) * 100 : 0;
 
+  // Prepare chart data
+  const priorityData = [
+    { label: 'Critical', value: myAssignedTickets.filter(t => t.priority === 'critical').length, color: '#dc2626' },
+    { label: 'High', value: myAssignedTickets.filter(t => t.priority === 'high').length, color: '#ea580c' },
+    { label: 'Medium', value: myAssignedTickets.filter(t => t.priority === 'medium').length, color: '#ca8a04' },
+    { label: 'Low', value: myAssignedTickets.filter(t => t.priority === 'low').length, color: '#16a34a' }
+  ];
+
+  const statusData = [
+    { label: 'Open', value: myAssignedTickets.filter(t => t.status === 'open').length, color: '#2563eb' },
+    { label: 'In Progress', value: myAssignedTickets.filter(t => t.status === 'in_progress').length, color: '#ea580c' },
+    { label: 'Resolved', value: myAssignedTickets.filter(t => t.status === 'resolved').length, color: '#16a34a' },
+    { label: 'Verified', value: myAssignedTickets.filter(t => t.status === 'verified').length, color: '#059669' }
+  ];
+
+  // Weekly performance data (mock for demonstration)
+  const weeklyData = [
+    { label: 'Mon', value: 3 },
+    { label: 'Tue', value: 5 },
+    { label: 'Wed', value: 2 },
+    { label: 'Thu', value: 8 },
+    { label: 'Fri', value: 6 },
+    { label: 'Sat', value: 1 },
+    { label: 'Sun', value: 0 }
+  ];
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical': return 'text-red-600 bg-red-100 dark:bg-red-900 dark:text-red-200';
