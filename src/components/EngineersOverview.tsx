@@ -113,6 +113,8 @@ export default function EngineersOverview({ onAssignTicket }: EngineersOverviewP
         console.error('Error loading engineers:', {
           message: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
+          component: 'EngineersOverview',
+          operation: 'loadEngineers',
           error: error
         });
       } finally {

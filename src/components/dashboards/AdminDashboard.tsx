@@ -127,7 +127,13 @@ export default function AdminDashboard() {
       
       setDepartmentStats(deptStats);
     } catch (error) {
-      console.error('Error loading system data:', error);
+      console.error('Error loading system data:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: 'AdminDashboard',
+        operation: 'loadSystemData',
+        error: error
+      });
     } finally {
       setLoading(false);
     }

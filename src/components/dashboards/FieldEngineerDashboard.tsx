@@ -58,7 +58,13 @@ export default function FieldEngineerDashboard() {
         overdue_tickets: dashboardData?.overdue_tickets || 0
       });
     } catch (error) {
-      console.error('Error loading dashboard stats:', error);
+      console.error('Error loading dashboard stats:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: user?.id,
+        component: 'FieldEngineerDashboard',
+        error: error
+      });
     } finally {
       setLoading(false);
     }

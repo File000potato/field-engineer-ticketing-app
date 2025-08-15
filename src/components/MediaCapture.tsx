@@ -147,7 +147,13 @@ export default function MediaCapture({
         videoRef.current.srcObject = stream;
       }
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error('Error accessing camera:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: 'MediaCapture',
+        operation: 'startCamera',
+        error: error
+      });
       toast({
         title: 'Camera access denied',
         description: 'Please allow camera access to capture photos and videos',
@@ -340,7 +346,14 @@ export default function MediaCapture({
       }
 
     } catch (error: any) {
-      console.error('Upload error:', error);
+      console.error('Upload error:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: 'MediaCapture',
+        operation: 'uploadFiles',
+        filesCount: files?.length,
+        error: error
+      });
       toast({
         title: 'Upload failed',
         description: error.message || 'An error occurred during upload',

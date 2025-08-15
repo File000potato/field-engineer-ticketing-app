@@ -66,7 +66,13 @@ export default function SupervisorDashboard() {
         critical_tickets: dashboardData?.critical_tickets || 0,
       });
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('Error loading dashboard data:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: 'SupervisorDashboard',
+        operation: 'loadDashboardData',
+        error: error
+      });
     } finally {
       setLoading(false);
     }
@@ -102,7 +108,14 @@ export default function SupervisorDashboard() {
     try {
       await assignTicket(ticketId, engineerId);
     } catch (error) {
-      console.error('Error assigning ticket:', error);
+      console.error('Error assigning ticket:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        ticketId: ticketId,
+        engineerId: engineerId,
+        component: 'SupervisorDashboard',
+        error: error
+      });
     }
   };
 
