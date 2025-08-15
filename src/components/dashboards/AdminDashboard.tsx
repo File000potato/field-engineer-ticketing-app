@@ -168,7 +168,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2">
         <h1 className="text-2xl font-bold flex items-center gap-2">
