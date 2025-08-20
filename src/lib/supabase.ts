@@ -1,35 +1,48 @@
+/**
+ * @fileoverview Supabase client configuration and database helpers
+ * @author Field Engineer Portal Team
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database';
+import { config, envLog, isFeatureEnabled } from '@/config/environment';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://wfvdepgdajlvlnlueltk.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmdmRlcGdkYWpsdmxubHVlbHRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU2MzUzNzUsImV4cCI6MjA1MTIxMTM3NX0.hNVvvz8R3jTpLhLxGnB8Q-tqZgqhfCX5rZ0j7cxhUjU';
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase environment variables not found, using defaults');
+// Validate Supabase configuration
+if (!config.supabase.isConfigured) {
+  if (config.isProduction) {
+    throw new Error('Supabase configuration is required for production deployment. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+  } else {
+    envLog('warn', 'Supabase not configured. Some features will use mock data.');
+  }
 }
 
 // Global flag to track if Supabase is available
-let supabaseAvailable = true;
+let supabaseAvailable = config.supabase.isConfigured;
 
-// Function to check Supabase connectivity
-const checkSupabaseConnection = async () => {
+/**
+ * Function to check Supabase connectivity
+ * @returns {Promise<boolean>} Whether Supabase is available
+ */
+const checkSupabaseConnection = async (): Promise<boolean> => {
+  if (!config.supabase.isConfigured) {
+    envLog('warn', 'Skipping Supabase connection check - not configured');
+    return false;
+  }
+
   try {
     const { data, error } = await supabase.from('user_profiles').select('count', { count: 'exact', head: true });
     if (error) throw error;
-    console.log('Supabase connection verified');
+    envLog('log', 'Supabase connection verified');
     return true;
   } catch (error) {
-    console.warn('Supabase connection failed, switching to mock data mode:', error);
+    envLog('warn', 'Supabase connection failed, switching to fallback mode:', error);
     supabaseAvailable = false;
     return false;
   }
 };
 
-// Check connection on module load
-checkSupabaseConnection();
-
-// Create a minimal auth-only client to avoid response conflicts
-export const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+// Create Supabase clients only if configured
+export const authClient = config.supabase.isConfigured ? createClient(config.supabase.url, config.supabase.anonKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
@@ -40,15 +53,22 @@ export const authClient = createClient(supabaseUrl, supabaseAnonKey, {
       'X-Client-Info': 'field-engineer-portal-auth'
     }
   }
-});
+}) : null;
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = config.supabase.isConfigured ? createClient<Database>(config.supabase.url, config.supabase.anonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
   }
-});
+}) : null;
+
+// Check connection on module load only if configured
+if (config.supabase.isConfigured) {
+  checkSupabaseConnection();
+} else {
+  envLog('warn', 'Supabase client not initialized - configuration missing');
+}
 
 // Helper function to get current user profile
 export const getCurrentUserProfile = async (existingUser?: any) => {
