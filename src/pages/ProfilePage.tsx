@@ -211,13 +211,7 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     try {
-      await signOut();
-      toast({
-        title: 'Signed out',
-        description: 'You have been successfully signed out.',
-      });
-      // Navigate to sign-in page after successful sign out
-      navigate('/auth');
+      await signOut(() => navigate('/auth'));
     } catch (error) {
       toast({
         title: 'Error',
