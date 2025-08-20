@@ -70,8 +70,17 @@ if (config.supabase.isConfigured) {
   envLog('warn', 'Supabase client not initialized - configuration missing');
 }
 
-// Helper function to get current user profile
+/**
+ * Helper function to get current user profile
+ * @param {any} [existingUser] - Existing user object to avoid redundant API calls
+ * @returns {Promise<any|null>} User profile or null
+ */
 export const getCurrentUserProfile = async (existingUser?: any) => {
+  if (!supabase) {
+    envLog('warn', 'getCurrentUserProfile called but Supabase not configured');
+    return null;
+  }
+
   try {
     // Use existing user if provided to avoid redundant API calls
     let user = existingUser;
@@ -79,7 +88,7 @@ export const getCurrentUserProfile = async (existingUser?: any) => {
     if (!user) {
       const { data: { user: fetchedUser }, error } = await supabase.auth.getUser();
       if (error) {
-        console.warn('Error fetching user:', error.message);
+        envLog('warn', 'Error fetching user:', error.message);
         return null;
       }
       user = fetchedUser;
@@ -94,19 +103,23 @@ export const getCurrentUserProfile = async (existingUser?: any) => {
       .single();
 
     if (error) {
-      console.warn('Error fetching profile:', error.message);
+      envLog('warn', 'Error fetching profile:', error.message);
       return null;
     }
 
     return profile;
   } catch (error) {
-    console.warn('Error in getCurrentUserProfile:', error);
+    envLog('warn', 'Error in getCurrentUserProfile:', error);
     return null;
   }
 };
 
-// Helper function to check if user has required role
-export const checkUserRole = async (requiredRoles: string[]) => {
+/**
+ * Helper function to check if user has required role
+ * @param {string[]} requiredRoles - Array of required roles
+ * @returns {Promise<boolean>} Whether user has required role
+ */
+export const checkUserRole = async (requiredRoles: string[]): Promise<boolean> => {
   const profile = await getCurrentUserProfile();
   return profile && requiredRoles.includes(profile.role);
 };
@@ -188,19 +201,39 @@ export const subscribeToNotifications = (
 // Import mock helpers for fallback
 import { mockDbHelpers } from './mock-data';
 
-// Wrapper function that automatically falls back to mock data
-const withFallback = async (supabaseOperation: () => Promise<any>, mockOperation: () => Promise<any>, operationName: string) => {
-  if (!supabaseAvailable) {
-    console.log(`Using mock data for ${operationName} (Supabase unavailable)`);
-    return await mockOperation();
+/**
+ * Wrapper function that automatically falls back to mock data when appropriate
+ * @param {Function} supabaseOperation - Operation to try with Supabase
+ * @param {Function} mockOperation - Fallback operation with mock data
+ * @param {string} operationName - Name of the operation for logging
+ * @returns {Promise<any>} Result from either Supabase or mock operation
+ */
+const withFallback = async (
+  supabaseOperation: () => Promise<any>,
+  mockOperation: () => Promise<any>,
+  operationName: string
+): Promise<any> => {
+  // If Supabase is not configured or not available, use mock data
+  if (!supabaseAvailable || !config.supabase.isConfigured) {
+    if (isFeatureEnabled('enableMockFallback')) {
+      envLog('log', `Using mock data for ${operationName} (Supabase unavailable)`);
+      return await mockOperation();
+    } else {
+      throw new Error(`${operationName} failed: Supabase not available and mock fallback disabled`);
+    }
   }
 
   try {
     return await supabaseOperation();
   } catch (error) {
-    console.warn(`Supabase ${operationName} failed, falling back to mock data:`, error);
-    supabaseAvailable = false; // Disable Supabase for future calls
-    return await mockOperation();
+    if (isFeatureEnabled('enableMockFallback')) {
+      envLog('warn', `Supabase ${operationName} failed, falling back to mock data:`, error);
+      supabaseAvailable = false; // Disable Supabase for future calls in this session
+      return await mockOperation();
+    } else {
+      envLog('error', `Supabase ${operationName} failed and mock fallback disabled:`, error);
+      throw error;
+    }
   }
 };
 
