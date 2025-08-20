@@ -8,6 +8,7 @@ import MapPage from '@/pages/MapPage';
 import ProfilePage from '@/pages/ProfilePage';
 import AdminSettingsPage from '@/pages/AdminSettingsPage';
 import EngineersPage from '@/pages/EngineersPage';
+import ResolvedTicketsPage from '@/pages/ResolvedTicketsPage';
 import NotFound from '@/pages/NotFound';
 import AppLayout from '@/components/AppLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -54,6 +55,7 @@ export default function AppRouter() {
             <Route path="profile" element={<ProfilePage />} />
             <Route path="profile/:userId" element={<ProfilePage />} />
             <Route path="engineers" element={<EngineersPage />} />
+            <Route path="admin/resolved-tickets" element={<ResolvedTicketsPage />} />
             <Route path="admin/settings" element={<AdminSettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
