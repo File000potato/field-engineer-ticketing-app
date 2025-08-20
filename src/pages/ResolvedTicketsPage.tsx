@@ -497,8 +497,9 @@ export default function ResolvedTicketsPage() {
                   <CardContent>
                     {stats.resolutionTrends.length > 0 ? (
                       <SimpleLineChart
+                        title="Monthly Resolution Trends"
                         data={stats.resolutionTrends.map(trend => ({
-                          name: trend.month,
+                          label: trend.month,
                           value: trend.count
                         }))}
                         height={200}
