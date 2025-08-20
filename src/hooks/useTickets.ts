@@ -7,6 +7,7 @@ import { toast } from '@/components/ui/use-toast';
 
 export const useTickets = () => {
   const { user, profile } = useAuth();
+  const { notifyTicketCreated, notifyTicketResolved, notifyTicketAssigned } = useNotificationSystem();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,6 +143,14 @@ export const useTickets = () => {
       }
 
       setTickets(prev => [transformedTicket, ...prev]);
+
+      // Send notifications to supervisors about new ticket
+      try {
+        await notifyTicketCreated(transformedTicket);
+      } catch (notificationError) {
+        console.warn('Failed to send ticket creation notifications:', notificationError);
+        // Don't fail the ticket creation if notifications fail
+      }
 
       toast({
         title: 'Ticket created',
