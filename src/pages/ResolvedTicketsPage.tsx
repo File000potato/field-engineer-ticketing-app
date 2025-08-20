@@ -38,9 +38,9 @@ import {
 import { cn } from '@/lib/utils';
 import { format, addDays, subMonths } from 'date-fns';
 import { DateRange } from 'react-day-picker';
-import { SimpleBarChart } from '@/components/charts/SimpleBarChart';
+import SimpleBarChart from '@/components/charts/SimpleBarChart';
 import SimpleLineChart from '@/components/charts/SimpleLineChart';
-import { DonutChart } from '@/components/charts/DonutChart';
+import DonutChart from '@/components/charts/DonutChart';
 import { toast } from '@/components/ui/use-toast';
 
 /**
