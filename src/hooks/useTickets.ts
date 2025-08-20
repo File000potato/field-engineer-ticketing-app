@@ -240,7 +240,20 @@ export const useTickets = () => {
       };
 
       setTickets(prev => prev.map(t => t.id === ticketId ? transformedTicket : t));
-      
+
+      // Send notifications based on the type of update
+      try {
+        if (updates.status === 'resolved') {
+          await notifyTicketResolved(transformedTicket, user.id);
+        }
+        if (updates.assigned_to && updates.assigned_to !== transformedTicket.created_by) {
+          await notifyTicketAssigned(transformedTicket, updates.assigned_to, user.id);
+        }
+      } catch (notificationError) {
+        console.warn('Failed to send ticket update notifications:', notificationError);
+        // Don't fail the ticket update if notifications fail
+      }
+
       toast({
         title: 'Ticket updated',
         description: 'The ticket has been updated successfully.',
