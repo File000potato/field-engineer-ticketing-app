@@ -12,6 +12,7 @@ import {
   Map, 
   User,
   Users,
+  Archive,
   Settings,
   LogOut,
   ChevronLeft,
