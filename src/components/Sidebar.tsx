@@ -40,6 +40,18 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { tickets } = useTickets();
   const { profile, signOut } = useAuth();
 
+  /**
+   * Handles user sign out and navigates to sign-in page
+   */
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
+
   const isAdmin = profile?.role === 'admin';
   const isSupervisor = profile?.role === 'supervisor';
   const isAdminOrSupervisor = isAdmin || isSupervisor;
@@ -334,7 +346,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         
         <Button
           variant="ghost"
-          onClick={signOut}
+          onClick={handleSignOut}
           className={cn(
             "w-full justify-start gap-3 h-12 text-red-600 hover:text-red-700 hover:bg-red-50",
             collapsed && "px-3 justify-center"
