@@ -104,6 +104,13 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       adminOnly: true
     },
     {
+      path: '/admin/resolved-tickets',
+      icon: Archive,
+      label: 'Resolved Tickets',
+      description: 'Ticket history & analytics',
+      adminOnly: true
+    },
+    {
       path: '/admin/settings',
       icon: Settings,
       label: 'Settings',
