@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,6 +52,7 @@ interface UserStats {
 
 export default function ProfilePage() {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const { user, profile: currentUserProfile, signOut } = useAuth();
   const isOnline = useOnlineStatus();
   const { theme, setTheme } = useTheme();
@@ -215,6 +216,8 @@ export default function ProfilePage() {
         title: 'Signed out',
         description: 'You have been successfully signed out.',
       });
+      // Navigate to sign-in page after successful sign out
+      navigate('/auth');
     } catch (error) {
       toast({
         title: 'Error',
