@@ -286,7 +286,11 @@ export function useAuth() {
     }
   };
 
-  const signOut = async () => {
+  /**
+   * Signs out the user and optionally calls a callback function
+   * @param {Function} [callback] - Optional callback to execute after successful sign out
+   */
+  const signOut = async (callback?: () => void) => {
     try {
       setState(prev => ({ ...prev, loading: true }));
 
@@ -318,6 +322,11 @@ export function useAuth() {
         title: 'Signed out',
         description: 'You have been signed out successfully.',
       });
+
+      // Execute callback if provided (e.g., for navigation)
+      if (callback) {
+        callback();
+      }
     } catch (error: any) {
       console.error('Sign out error:', {
         message: error instanceof Error ? error.message : String(error),
