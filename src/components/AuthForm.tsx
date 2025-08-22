@@ -16,7 +16,9 @@ import {
   AlertTriangle,
   CheckCircle
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { FcGoogle } from 'react-icons/fc';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
 interface AuthFormProps {
@@ -170,6 +172,19 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setError('');
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setSuccess('');
+
+    try {
+      await signInWithGoogle();
+      setSuccess('Signed in with Google successfully!');
+      onAuthSuccess?.();
+    } catch (err: any) {
+      setError(err.message || 'Google sign in failed. Please try again.');
+    }
   };
 
   const getPasswordStrengthText = () => {
@@ -410,19 +425,43 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
                 </Alert>
               )}
               
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {activeTab === 'signin' ? 'Signing in...' : 'Creating account...'}
-                  </>
-                ) : (
-                  <>
-                    <Shield className="w-4 h-4 mr-2" />
-                    {activeTab === 'signin' ? 'Sign In Securely' : 'Create Account'}
-                  </>
-                )}
-              </Button>
+              <div className="space-y-3">
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {activeTab === 'signin' ? 'Signing in...' : 'Creating account...'}
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="w-4 h-4 mr-2" />
+                      {activeTab === 'signin' ? 'Sign In Securely' : 'Create Account'}
+                    </>
+                  )}
+                </Button>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  disabled={loading}
+                  onClick={handleGoogleSignIn}
+                >
+                  <FcGoogle className="w-4 h-4 mr-2" />
+                  {activeTab === 'signin' ? 'Sign in with Google' : 'Continue with Google'}
+                </Button>
+              </div>
             </form>
           </Tabs>
           
