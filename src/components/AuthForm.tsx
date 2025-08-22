@@ -30,7 +30,7 @@ interface PasswordStrength {
 }
 
 export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
-  const { signIn, signUp, loading } = useAuth();
+  const { signIn, signInWithGoogle, signUp, loading } = useFirebaseAuth();
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const [formData, setFormData] = useState({
     email: '',
