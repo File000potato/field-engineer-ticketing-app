@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useTickets } from '@/hooks/useTickets';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import { useFirebaseTickets } from '@/hooks/useFirebaseTickets';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -59,8 +59,8 @@ interface TimeEntry {
 
 export default function EngineersPage() {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
-  const { tickets } = useTickets();
+  const { user, profile } = useFirebaseAuth();
+  const { tickets } = useFirebaseTickets();
   const [engineers, setEngineers] = useState<UserProfile[]>([]);
   const [engineerPerformance, setEngineerPerformance] = useState<EngineerPerformance[]>([]);
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
