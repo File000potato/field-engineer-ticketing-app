@@ -11,14 +11,14 @@ import EngineersPage from '@/pages/EngineersPage';
 import ResolvedTicketsPage from '@/pages/ResolvedTicketsPage';
 import NotFound from '@/pages/NotFound';
 import AppLayout from '@/components/AppLayout';
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import AuthForm from '@/components/AuthForm';
 import { ThemeProvider } from '@/components/theme-provider';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Loader2 } from 'lucide-react';
 
 export default function AppRouter() {
-  const { user, loading } = useAuth();
+  const { user, loading } = useFirebaseAuth();
 
   if (loading) {
     return (
