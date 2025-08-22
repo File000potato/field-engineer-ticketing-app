@@ -27,7 +27,7 @@ import {
   Activity
 } from 'lucide-react';
 import { useTickets } from '@/hooks/useTickets';
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -39,7 +39,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { tickets } = useTickets();
-  const { profile, signOut } = useAuth();
+  const { profile, signOut } = useFirebaseAuth();
 
   /**
    * Handles user sign out and navigates to sign-in page
