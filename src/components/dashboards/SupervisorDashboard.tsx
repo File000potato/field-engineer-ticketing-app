@@ -50,12 +50,11 @@ export default function SupervisorDashboard() {
     if (!user) return;
 
     try {
-      // Load engineers
-      const engineersData = await dbHelpers.getUsers('field_engineer');
-      setEngineers(engineersData || []);
+      // Engineers are loaded via Firebase hook
+      const engineersData = allUsers?.filter(u => u.role === 'field_engineer') || [];
+      setEngineers(engineersData);
 
-      // Load dashboard stats
-      const dashboardData = await dbHelpers.getDashboardStats(user.id);
+      // Calculate stats from Firebase data
       
       setTeamStats({
         total_engineers: engineersData?.length || 0,
