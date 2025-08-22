@@ -268,43 +268,39 @@ export default function MediaCapture({
         const fileName = `${ticketId}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
 
         try {
-          // Upload to Supabase Storage
-          const uploadData = await uploadFile('ticket-media', fileName, mediaFile.file);
-          
-          // Get public URL
-          const publicUrl = getFileUrl('ticket-media', uploadData.path);
+          // Upload to Firebase Storage
+          const fileUrl = await dbService.uploadFile(`tickets/${ticketId}/${fileName}`, mediaFile.file);
 
-          // Save to database
-          const { data, error } = await supabase
-            .from('ticket_media')
-            .insert({
-              ticket_id: ticketId,
-              file_name: mediaFile.file.name,
-              file_type: mediaFile.file.type,
-              file_size: mediaFile.file.size,
-              storage_path: uploadData.path,
-              uploaded_by: user.id
-            })
-            .select()
-            .single();
+          console.log('File uploaded successfully to Firebase:', fileName);
 
-          if (error) throw error;
+          // Save to Firestore
+          const mediaDoc = await dbService.addDocument('ticket_media', {
+            ticket_id: ticketId,
+            file_name: mediaFile.file.name,
+            file_type: mediaFile.file.type,
+            file_size: mediaFile.file.size,
+            file_url: fileUrl,
+            uploaded_by: user.uid,
+            created_at: new Date().toISOString()
+          });
+
+          console.log('Media saved to Firestore:', mediaDoc.id);
 
           // Update UI to show success
-          setMediaFiles(prev => prev.map(f => 
-            f.id === mediaFile.id 
-              ? { 
-                  ...f, 
-                  uploading: false, 
-                  uploaded: true, 
+          setMediaFiles(prev => prev.map(f =>
+            f.id === mediaFile.id
+              ? {
+                  ...f,
+                  uploading: false,
+                  uploaded: true,
                   progress: 100,
-                  storage_path: uploadData.path,
-                  url: publicUrl
+                  storage_path: fileName,
+                  url: fileUrl
                 }
               : f
           ));
 
-          return { ...mediaFile, uploaded: true, storage_path: uploadData.path, url: publicUrl };
+          return { ...mediaFile, uploaded: true, storage_path: fileName, url: fileUrl };
         } catch (error) {
           console.error('Upload failed for file:', mediaFile.file.name, error);
           
