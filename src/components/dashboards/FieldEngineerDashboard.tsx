@@ -23,7 +23,7 @@ import {
 import SimpleBarChart from '@/components/charts/SimpleBarChart';
 import DonutChart from '@/components/charts/DonutChart';
 import SimpleLineChart from '@/components/charts/SimpleLineChart';
-import { dbHelpers } from '@/lib/supabase';
+// Firebase hooks provide all data access
 import { cn } from '@/lib/utils';
 
 interface DashboardStats {

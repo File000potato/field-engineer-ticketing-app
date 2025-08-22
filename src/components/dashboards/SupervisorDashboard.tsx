@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useTickets } from '@/hooks/useTickets';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import { useFirebaseTickets } from '@/hooks/useFirebaseTickets';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ import {
   MapPin,
   ArrowRight
 } from 'lucide-react';
-import { dbHelpers, supabase } from '@/lib/supabase';
+// Firebase hooks provide all data access
 import { UserProfile } from '@/types/ticket';
 import { cn } from '@/lib/utils';
 

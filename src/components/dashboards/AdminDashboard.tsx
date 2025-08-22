@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useTickets } from '@/hooks/useTickets';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import { useFirebaseTickets } from '@/hooks/useFirebaseTickets';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,8 +21,7 @@ import {
   Clock,
   CheckCircle
 } from 'lucide-react';
-import { dbHelpers, supabase } from '@/lib/supabase';
-import { mockDbHelpers, mockUsers } from '@/lib/mock-data';
+// Firebase hooks provide all data access
 import { UserProfile } from '@/types/ticket';
 import { cn } from '@/lib/utils';
 import EngineersOverview from '@/components/EngineersOverview';
@@ -46,8 +45,8 @@ interface DepartmentStats {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { tickets } = useTickets();
+  const { user } = useFirebaseAuth();
+  const { tickets, users: allUsers } = useFirebaseTickets();
   const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
   const [departmentStats, setDepartmentStats] = useState<DepartmentStats[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);

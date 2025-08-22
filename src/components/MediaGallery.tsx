@@ -17,7 +17,7 @@ import {
   VolumeX
 } from 'lucide-react';
 import { TicketMedia } from '@/types/ticket';
-import { getFileUrl } from '@/lib/supabase';
+// Firebase handles file URLs directly - no helper needed
 
 interface MediaGalleryProps {
   media: TicketMedia[];
