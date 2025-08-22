@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -53,7 +53,7 @@ interface UserStats {
 export default function ProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { user, profile: currentUserProfile, signOut } = useAuth();
+  const { user, profile: currentUserProfile, signOut } = useFirebaseAuth();
   const isOnline = useOnlineStatus();
   const { theme, setTheme } = useTheme();
   

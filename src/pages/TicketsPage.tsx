@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useTickets } from '@/hooks/useTickets';
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseTickets } from '@/hooks/useFirebaseTickets';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { dbHelpers } from '@/lib/supabase';
 import { mockDbHelpers } from '@/lib/mock-data';
 import { UserProfile } from '@/types/ticket';
@@ -32,8 +32,8 @@ import { cn } from '@/lib/utils';
 
 export default function TicketsPage() {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
-  const { tickets, loading, assignTicket } = useTickets();
+  const { user, profile } = useFirebaseAuth();
+  const { tickets, loading, assignTicket } = useFirebaseTickets();
   const [searchParams, setSearchParams] = useSearchParams();
   const [engineers, setEngineers] = useState<UserProfile[]>([]);
   

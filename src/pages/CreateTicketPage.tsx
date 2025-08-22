@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTickets } from '@/hooks/useTickets';
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseTickets } from '@/hooks/useFirebaseTickets';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,8 +26,8 @@ import { toast } from '@/components/ui/use-toast';
 
 export default function CreateTicketPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { createTicket } = useTickets();
+  const { user } = useFirebaseAuth();
+  const { createTicket } = useFirebaseTickets();
   
   const [formData, setFormData] = useState({
     title: '',
