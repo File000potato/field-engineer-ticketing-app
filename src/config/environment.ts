@@ -17,10 +17,14 @@ interface EnvironmentConfig {
   /** Whether to enable debug features */
   enableDebug: boolean;
   
-  /** Supabase configuration */
-  supabase: {
-    url: string;
-    anonKey: string;
+  /** Firebase configuration */
+  firebase: {
+    apiKey: string;
+    authDomain: string;
+    projectId: string;
+    storageBucket: string;
+    messagingSenderId: string;
+    appId: string;
     isConfigured: boolean;
   };
   
@@ -48,14 +52,19 @@ export function getEnvironmentConfig(): EnvironmentConfig {
   const isProduction = import.meta.env.PROD;
   const isDevelopment = import.meta.env.DEV;
   
-  // Supabase configuration
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  const isSupabaseConfigured = Boolean(
-    supabaseUrl && 
-    supabaseAnonKey && 
-    supabaseUrl !== 'your-supabase-url' && 
-    supabaseAnonKey !== 'your-supabase-anon-key'
+  // Firebase configuration
+  const firebaseApiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+  const firebaseAuthDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN;
+  const firebaseProjectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+  const firebaseStorageBucket = import.meta.env.VITE_FIREBASE_STORAGE_BUCKET;
+  const firebaseMessagingSenderId = import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID;
+  const firebaseAppId = import.meta.env.VITE_FIREBASE_APP_ID;
+
+  const isFirebaseConfigured = Boolean(
+    firebaseApiKey &&
+    firebaseProjectId &&
+    firebaseApiKey !== 'demo-api-key' &&
+    firebaseProjectId !== 'demo-project'
   );
 
   return {
@@ -63,10 +72,14 @@ export function getEnvironmentConfig(): EnvironmentConfig {
     isDevelopment,
     enableDebug: isDevelopment,
     
-    supabase: {
-      url: supabaseUrl || '',
-      anonKey: supabaseAnonKey || '',
-      isConfigured: isSupabaseConfigured
+    firebase: {
+      apiKey: firebaseApiKey || '',
+      authDomain: firebaseAuthDomain || '',
+      projectId: firebaseProjectId || '',
+      storageBucket: firebaseStorageBucket || '',
+      messagingSenderId: firebaseMessagingSenderId || '',
+      appId: firebaseAppId || '',
+      isConfigured: isFirebaseConfigured
     },
     
     app: {
@@ -76,11 +89,12 @@ export function getEnvironmentConfig(): EnvironmentConfig {
     },
     
     features: {
-      // In production, only enable mock fallback if Supabase is not configured
-      enableMockFallback: !isProduction || !isSupabaseConfigured,
+      // In production, disable mock fallback since Firebase is fast and reliable
+      enableMockFallback: false,
       enableOfflineMode: true,
-      enablePushNotifications: isProduction && isSupabaseConfigured,
-      enableAuditLogging: isSupabaseConfigured
+      enablePushNotifications: isProduction && isFirebaseConfigured,
+      enableAuditLogging: isFirebaseConfigured,
+      enableRealTimeUpdates: isFirebaseConfigured
     }
   };
 }
@@ -93,19 +107,19 @@ export function validateEnvironmentConfig(): { isValid: boolean; errors: string[
   const config = getEnvironmentConfig();
   const errors: string[] = [];
 
-  // Check if running in production without proper Supabase configuration
-  if (config.isProduction && !config.supabase.isConfigured) {
-    errors.push('Production mode requires valid Supabase configuration (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY)');
+  // Check if running in production without proper Firebase configuration
+  if (config.isProduction && !config.firebase.isConfigured) {
+    errors.push('Production mode requires valid Firebase configuration (VITE_FIREBASE_API_KEY and VITE_FIREBASE_PROJECT_ID)');
   }
 
-  // Validate Supabase URL format
-  if (config.supabase.url && !config.supabase.url.includes('supabase.co')) {
-    errors.push('Invalid Supabase URL format');
+  // Validate Firebase project ID format
+  if (config.firebase.projectId && config.firebase.projectId.includes(' ')) {
+    errors.push('Invalid Firebase project ID format (no spaces allowed)');
   }
 
   // Check for placeholder values
-  if (config.supabase.url === 'your-supabase-url' || config.supabase.anonKey === 'your-supabase-anon-key') {
-    errors.push('Please replace placeholder Supabase credentials with actual values');
+  if (config.firebase.apiKey === 'demo-api-key' || config.firebase.projectId === 'demo-project') {
+    errors.push('Please replace placeholder Firebase credentials with actual values');
   }
 
   return {
@@ -125,9 +139,9 @@ export function logEnvironmentConfig(): void {
     mode: config.isProduction ? 'production' : 'development',
     app: config.app,
     features: config.features,
-    supabase: {
-      configured: config.supabase.isConfigured,
-      url: config.supabase.url ? `${config.supabase.url.substring(0, 20)}...` : 'not set'
+    firebase: {
+      configured: config.firebase.isConfigured,
+      projectId: config.firebase.projectId || 'not set'
     },
     validation: validation.isValid ? '✅ Valid' : `❌ Invalid: ${validation.errors.join(', ')}`
   });
