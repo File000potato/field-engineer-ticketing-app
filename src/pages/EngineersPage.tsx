@@ -26,8 +26,7 @@ import {
   Activity,
   Target
 } from 'lucide-react';
-import { dbHelpers } from '@/lib/supabase';
-import { mockDbHelpers } from '@/lib/mock-data';
+// Firebase hooks provide all data access
 import { UserProfile } from '@/types/ticket';
 import { cn } from '@/lib/utils';
 
@@ -60,8 +59,7 @@ interface TimeEntry {
 export default function EngineersPage() {
   const navigate = useNavigate();
   const { user, profile } = useFirebaseAuth();
-  const { tickets } = useFirebaseTickets();
-  const [engineers, setEngineers] = useState<UserProfile[]>([]);
+  const { tickets, users: engineers } = useFirebaseTickets();
   const [engineerPerformance, setEngineerPerformance] = useState<EngineerPerformance[]>([]);
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,18 +76,8 @@ export default function EngineersPage() {
     try {
       console.log('Loading engineers data...');
 
-      // Load engineers
-      console.log('Fetching field engineers...');
-      let engineersData;
-      try {
-        engineersData = await dbHelpers.getUsers('field_engineer');
-        console.log('Engineers loaded from Supabase:', engineersData?.length || 0);
-      } catch (supabaseError) {
-        console.log('Supabase failed, falling back to mock data:', supabaseError);
-        engineersData = await mockDbHelpers.getUsers('field_engineer');
-        console.log('Engineers loaded from mock:', engineersData?.length || 0);
-      }
-      setEngineers(engineersData || []);
+      // Engineers are loaded via Firebase hook
+      console.log('Engineers loaded via Firebase hook:', engineers?.length || 0);
 
       // Load time entries (mock for now)
       console.log('Creating mock time entries...');
@@ -111,7 +99,7 @@ export default function EngineersPage() {
 
       // Calculate performance metrics
       console.log('Calculating performance metrics...');
-      const performance = (engineersData || []).map(engineer => {
+      const performance = (engineers || []).map(engineer => {
         const assignedTickets = tickets.filter(t => t.assigned_to === engineer.id);
         const completedTickets = assignedTickets.filter(t => ['resolved', 'verified', 'closed'].includes(t.status));
         const activeTickets = assignedTickets.filter(t => ['assigned', 'in_progress'].includes(t.status));

@@ -40,7 +40,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '@/components/theme-provider';
 import { toast } from '@/components/ui/use-toast';
-import { dbHelpers } from '@/lib/supabase';
+import { dbService } from '@/lib/firebase';
 import { UserProfile } from '@/types/ticket';
 
 interface UserStats {
@@ -86,7 +86,7 @@ export default function ProfilePage() {
       } else if (userId && isAdmin) {
         console.log('Loading other user profile...', userId);
         try {
-          const userProfile = await dbHelpers.getUserProfile(userId);
+          const userProfile = await dbService.getDocument('user_profiles', userId);
           console.log('User profile loaded:', userProfile);
           setProfile(userProfile);
           setEditedProfile(userProfile || {});
@@ -102,7 +102,13 @@ export default function ProfilePage() {
         const targetUserId = userId || user?.id;
         console.log('Loading user stats for:', targetUserId);
         try {
-          const stats = await dbHelpers.getUserStats(targetUserId);
+          // For now, mock user stats since Firebase implementation is simpler
+          const stats = {
+            totalTickets: 0,
+            completedTickets: 0,
+            avgResolutionTime: 0,
+            lastActivity: new Date().toISOString()
+          };
           console.log('User stats loaded:', stats);
           setUserStats(stats);
         } catch (statsError) {
@@ -134,10 +140,10 @@ export default function ProfilePage() {
       
       if (isViewingOwnProfile) {
         // Update own profile
-        await dbHelpers.updateUserProfile(user!.id, editedProfile);
+        await dbService.updateDocument('user_profiles', user!.uid, editedProfile);
       } else if (canManageUser && userId) {
         // Update another user's profile (admin only)
-        await dbHelpers.updateUserProfile(userId, editedProfile);
+        await dbService.updateDocument('user_profiles', userId, editedProfile);
       }
 
       setProfile({ ...profile, ...editedProfile } as UserProfile);
@@ -164,7 +170,10 @@ export default function ProfilePage() {
 
     try {
       setLoading(true);
-      await dbHelpers.updateUserRole(userId, newRole as 'admin' | 'supervisor' | 'field_engineer');
+      await dbService.updateDocument('user_profiles', userId, {
+        role: newRole,
+        updated_at: new Date().toISOString()
+      });
       
       setProfile({ ...profile!, role: newRole as any });
       
@@ -189,7 +198,10 @@ export default function ProfilePage() {
 
     try {
       setLoading(true);
-      await dbHelpers.deactivateUser(userId);
+      await dbService.updateDocument('user_profiles', userId, {
+        is_active: false,
+        updated_at: new Date().toISOString()
+      });
       
       setProfile({ ...profile!, is_active: false });
       

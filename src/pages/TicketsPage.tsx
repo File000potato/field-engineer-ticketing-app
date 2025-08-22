@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useFirebaseTickets } from '@/hooks/useFirebaseTickets';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
-import { dbHelpers } from '@/lib/supabase';
-import { mockDbHelpers } from '@/lib/mock-data';
+// Firebase hooks provide all data access
 import { UserProfile } from '@/types/ticket';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -33,9 +32,9 @@ import { cn } from '@/lib/utils';
 export default function TicketsPage() {
   const navigate = useNavigate();
   const { user, profile } = useFirebaseAuth();
-  const { tickets, loading, assignTicket } = useFirebaseTickets();
+  const { tickets, users: engineers, loading, assignTicket } = useFirebaseTickets();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [engineers, setEngineers] = useState<UserProfile[]>([]);
+  // Engineers data is provided by the useFirebaseTickets hook
   
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all');
@@ -66,22 +65,8 @@ export default function TicketsPage() {
   }, [searchTerm, statusFilter, priorityFilter, assignedFilter, setSearchParams]);
 
   const loadEngineers = async () => {
-    try {
-      let engineersData;
-      try {
-        engineersData = await dbHelpers.getUsers('field_engineer');
-      } catch (supabaseError) {
-        console.log('Supabase failed, falling back to mock data');
-        engineersData = await mockDbHelpers.getUsers('field_engineer');
-      }
-      setEngineers(engineersData || []);
-    } catch (error) {
-      console.error('Error loading engineers:', {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        error: error
-      });
-    }
+    // Engineers are loaded via Firebase hook - no additional loading needed
+    console.log('Engineers loaded via Firebase hook');
   };
 
   // Filter tickets based on user role
