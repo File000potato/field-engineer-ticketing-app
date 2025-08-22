@@ -36,8 +36,8 @@ interface TeamStats {
 
 export default function SupervisorDashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { tickets, getUnassignedTickets, getOverdueTickets, assignTicket } = useTickets();
+  const { user } = useFirebaseAuth();
+  const { tickets, users: allUsers, assignTicket } = useFirebaseTickets();
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
   const [engineers, setEngineers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
