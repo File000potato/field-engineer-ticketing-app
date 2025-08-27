@@ -384,23 +384,92 @@ export function useFirebaseAuth() {
     try {
       setState(prev => ({ ...prev, loading: true }));
 
+      // Check if Firebase is properly configured
+      if (!isFirebaseConfigured()) {
+        envLog('warn', 'Firebase not configured, using mock account creation');
+
+        // Use mock authentication as fallback
+        const mockUser = await MockAuthService.createAccount(email, password, fullName);
+
+        setState({
+          user: mockUser as any,
+          profile: UserProfile.fromDatabaseRecord({
+            id: mockUser.uid,
+            email: mockUser.email,
+            fullName: mockUser.displayName || fullName,
+            role: 'field_engineer', // Default role for new accounts
+            department: null,
+            phone: null,
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }),
+          loading: false,
+          initialized: true
+        });
+
+        toast({
+          title: 'Account created! (Demo Mode)',
+          description: 'Demo account has been created successfully.',
+        });
+
+        return;
+      }
+
       await authService.createAccount(email, password, fullName);
-      
+
       toast({
         title: 'Account created!',
         description: 'Your account has been created successfully.',
       });
     } catch (error: any) {
       envLog('error', 'Sign up error:', error);
-      
+
+      // Check if this is a Firebase network error
+      if (error.message.includes('network-request-failed') || error.message.includes('auth/network-request-failed')) {
+        envLog('warn', 'Firebase network error detected during sign up, falling back to mock auth');
+
+        try {
+          const mockUser = await MockAuthService.createAccount(email, password, fullName);
+
+          setState({
+            user: mockUser as any,
+            profile: UserProfile.fromDatabaseRecord({
+              id: mockUser.uid,
+              email: mockUser.email,
+              fullName: mockUser.displayName || fullName,
+              role: 'field_engineer',
+              department: null,
+              phone: null,
+              isActive: true,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }),
+            loading: false,
+            initialized: true
+          });
+
+          toast({
+            title: 'Account created! (Demo Mode)',
+            description: 'Demo account has been created due to network issues.',
+          });
+
+          return;
+        } catch (mockError) {
+          // If even mock auth fails, show the original error
+        }
+      }
+
       let errorMessage = 'Account creation failed. Please try again.';
-      
+
       if (error.message.includes('email-already-in-use')) {
         errorMessage = 'An account with this email already exists.';
       } else if (error.message.includes('weak-password')) {
         errorMessage = 'Password should be at least 6 characters long.';
       } else if (error.message.includes('invalid-email')) {
         errorMessage = 'Please enter a valid email address.';
+      } else if (error.message.includes('network-request-failed')) {
+        errorMessage = 'Network connection failed. Please check your internet connection and try again.';
       }
 
       toast({
