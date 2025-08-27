@@ -211,9 +211,19 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription className="text-xs">
               <strong>Demo Mode Active:</strong> Firebase not configured, using test accounts:<br/>
-              • <span className="font-mono">admin@test.com</span> / <span className="font-mono">admin123</span> (Admin)<br/>
-              • <span className="font-mono">supervisor@test.com</span> / <span className="font-mono">supervisor123</span> (Supervisor)<br/>
-              • <span className="font-mono">engineer@test.com</span> / <span className="font-mono">engineer123</span> (Field Engineer)
+              {activeTab === 'signin' ? (
+                <>
+                  • <span className="font-mono">admin@test.com</span> / <span className="font-mono">admin123</span> (Admin)<br/>
+                  • <span className="font-mono">supervisor@test.com</span> / <span className="font-mono">supervisor123</span> (Supervisor)<br/>
+                  • <span className="font-mono">engineer@test.com</span> / <span className="font-mono">engineer123</span> (Field Engineer)
+                </>
+              ) : (
+                <>
+                  Create any demo account with email/password.<br/>
+                  New accounts are assigned Field Engineer role by default.<br/>
+                  <span className="text-muted-foreground">Note: Demo accounts are not persistent.</span>
+                </>
+              )}
             </AlertDescription>
           </Alert>
         </CardHeader>
