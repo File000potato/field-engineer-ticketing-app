@@ -1,84 +1,34 @@
 /**
- * @fileoverview Firebase-based notifications hook for real-time notifications
+ * @fileoverview Firebase-based notifications hook that uses centralized data context
  * @author Field Engineer Portal Team
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { dbService } from '@/lib/firebase';
+import { useCallback } from 'react';
+import { dbService, isFirebaseConfigured } from '@/lib/firebase';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import { useFirebaseData } from '@/contexts/FirebaseDataContext';
 import { Notification, NotificationFactory } from '@/models/Notification';
 import { Ticket } from '@/models/Ticket';
 import { envLog } from '@/config/environment';
 
 /**
- * Hook for managing Firebase-based notifications
+ * Hook for managing Firebase-based notifications using centralized context
  * @returns {Object} Notification system functions and state
  */
 export function useFirebaseNotifications() {
   const { user, profile } = useFirebaseAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(false);
-
-  // Load notifications with real-time updates
-  useEffect(() => {
-    if (!user) {
-      setNotifications([]);
-      setUnreadCount(0);
-      return;
-    }
-
-    setLoading(true);
-
-    // Set up real-time listener for notifications
-    const unsubscribe = dbService.getNotificationsRealtime(
-      user.uid,
-      (firebaseNotifications) => {
-        try {
-          // Convert Firebase data to Notification models
-          const notificationModels = firebaseNotifications.map(notifData => 
-            Notification.fromDatabaseRecord({
-              id: notifData.id,
-              user_id: notifData.userId,
-              type: notifData.type,
-              title: notifData.title,
-              message: notifData.message,
-              priority: notifData.priority,
-              is_read: notifData.isRead || false,
-              ticket_id: notifData.ticketId,
-              triggered_by: notifData.triggeredBy,
-              metadata: notifData.metadata,
-              created_at: notifData.createdAt?.toISOString() || new Date().toISOString(),
-              read_at: notifData.readAt?.toISOString(),
-              expires_at: notifData.expiresAt?.toISOString()
-            })
-          );
-
-          // Filter out expired notifications
-          const activeNotifications = notificationModels.filter(notif => !notif.isExpired());
-          
-          setNotifications(activeNotifications);
-          setUnreadCount(activeNotifications.filter(notif => !notif.isRead).length);
-          setLoading(false);
-          
-          envLog('log', `Loaded ${activeNotifications.length} notifications in real-time`);
-        } catch (error) {
-          envLog('error', 'Error processing notifications data:', error);
-          setLoading(false);
-        }
-      }
-    );
-
-    return () => {
-      unsubscribe();
-    };
-  }, [user]);
+  const { notifications, unreadCount, notificationsLoading: loading } = useFirebaseData();
 
   /**
    * Creates and sends notification when a ticket is created
    * @param {Ticket} ticket - The created ticket
    */
   const notifyTicketCreated = useCallback(async (ticket: Ticket) => {
+    if (!isFirebaseConfigured()) {
+      envLog('log', 'Mock notification: Ticket created');
+      return;
+    }
+
     try {
       // Get all supervisors and admins to notify
       const supervisors = await dbService.getUsersByRole('supervisor');
@@ -113,6 +63,11 @@ export function useFirebaseNotifications() {
    * @param {string} resolvedByUserId - ID of user who resolved the ticket
    */
   const notifyTicketResolved = useCallback(async (ticket: Ticket, resolvedByUserId: string) => {
+    if (!isFirebaseConfigured()) {
+      envLog('log', 'Mock notification: Ticket resolved');
+      return;
+    }
+
     try {
       const notification = NotificationFactory.createTicketResolvedNotification(ticket, resolvedByUserId);
       
@@ -140,6 +95,11 @@ export function useFirebaseNotifications() {
    * @param {string} assignedByUserId - ID of user who made assignment
    */
   const notifyTicketAssigned = useCallback(async (ticket: Ticket, assignedUserId: string, assignedByUserId: string) => {
+    if (!isFirebaseConfigured()) {
+      envLog('log', 'Mock notification: Ticket assigned');
+      return;
+    }
+
     try {
       const notification = NotificationFactory.createTicketAssignedNotification(ticket, assignedUserId, assignedByUserId);
       
@@ -165,17 +125,15 @@ export function useFirebaseNotifications() {
    * @param {string} notificationId - ID of the notification to mark as read
    */
   const markAsRead = useCallback(async (notificationId: string) => {
+    if (!isFirebaseConfigured()) {
+      envLog('log', 'Mock: Mark notification as read');
+      return;
+    }
+
     try {
-      // Update in Firebase (this would require implementing update in dbService)
-      // For now, we'll update local state
-      setNotifications(prev => 
-        prev.map(notif => 
-          notif.id === notificationId 
-            ? { ...notif, isRead: true, readAt: new Date() } as Notification
-            : notif
-        )
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      // This would require implementing an update function in dbService
+      // For now, we'll just log it
+      envLog('log', 'Marking notification as read:', notificationId);
     } catch (error) {
       envLog('error', 'Error marking notification as read:', error);
     }
@@ -185,12 +143,14 @@ export function useFirebaseNotifications() {
    * Marks all notifications as read for the current user
    */
   const markAllAsRead = useCallback(async () => {
+    if (!isFirebaseConfigured()) {
+      envLog('log', 'Mock: Mark all notifications as read');
+      return;
+    }
+
     try {
-      // Update all unread notifications
-      setNotifications(prev => 
-        prev.map(notif => ({ ...notif, isRead: true, readAt: new Date() } as Notification))
-      );
-      setUnreadCount(0);
+      // This would require batch updates in dbService
+      envLog('log', 'Marking all notifications as read');
     } catch (error) {
       envLog('error', 'Error marking all notifications as read:', error);
     }
@@ -236,6 +196,11 @@ export function useFirebaseNotifications() {
     priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium'
   ) => {
     if (!user) return;
+
+    if (!isFirebaseConfigured()) {
+      envLog('log', 'Mock system notification:', title);
+      return;
+    }
 
     try {
       await dbService.createNotification({
