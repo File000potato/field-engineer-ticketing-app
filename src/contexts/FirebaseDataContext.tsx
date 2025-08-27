@@ -179,8 +179,7 @@ export function FirebaseDataProvider({ children }: { children: React.ReactNode }
     setNotificationsLoading(true);
 
     if (!isFirebaseConfigured()) {
-      // Use mock data when Firebase is not configured
-      envLog('log', 'Using mock notifications data');
+      envLog('error', 'Firebase not configured, cannot load notifications');
       setNotifications([]);
       setUnreadCount(0);
       setNotificationsLoading(false);
