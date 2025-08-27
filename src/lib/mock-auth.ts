@@ -171,7 +171,147 @@ export const mockAuth = {
 export const getCurrentUserProfileMock = async (existingUser?: MockUser) => {
   const user = existingUser || currentSession?.user;
   if (!user) return null;
-  
+
   const mockUser = mockUsers.get(user.email);
   return mockUser?.profile || null;
 };
+
+// Firebase-compatible Mock User object
+interface FirebaseMockUser {
+  uid: string;
+  email: string;
+  displayName: string;
+  role?: string;
+  emailVerified: boolean;
+  isAnonymous: boolean;
+  metadata: {
+    creationTime: string;
+    lastSignInTime: string;
+  };
+  providerData: any[];
+}
+
+/**
+ * Firebase-compatible Mock Authentication Service
+ * Used as fallback when Firebase is not properly configured
+ */
+export class MockAuthService {
+  private static createFirebaseUser(mockProfile: MockProfile): FirebaseMockUser {
+    return {
+      uid: mockProfile.id,
+      email: mockProfile.email,
+      displayName: mockProfile.full_name,
+      role: mockProfile.role,
+      emailVerified: true,
+      isAnonymous: false,
+      metadata: {
+        creationTime: mockProfile.created_at,
+        lastSignInTime: new Date().toISOString()
+      },
+      providerData: [{
+        uid: mockProfile.email,
+        displayName: mockProfile.full_name,
+        email: mockProfile.email,
+        providerId: 'password'
+      }]
+    };
+  }
+
+  static async signIn(email: string, password: string): Promise<FirebaseMockUser> {
+    console.log('MockAuthService: Attempting sign in with email:', email);
+
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Find user with case-insensitive email matching
+    let mockUser = null;
+    for (const [key, user] of mockUsers.entries()) {
+      if (key.toLowerCase() === normalizedEmail) {
+        mockUser = user;
+        break;
+      }
+    }
+
+    if (!mockUser) {
+      throw new Error(`Demo account not found. Try: admin@test.com, supervisor@test.com, or engineer@test.com`);
+    }
+
+    if (mockUser.password !== password) {
+      throw new Error('Invalid password. Try: admin123, supervisor123, or engineer123');
+    }
+
+    if (!mockUser.profile.is_active) {
+      throw new Error('Account is deactivated');
+    }
+
+    // Store session for consistency
+    const session = {
+      user: mockUser.user,
+      access_token: `mock_token_${Date.now()}`
+    };
+
+    currentSession = session;
+    localStorage.setItem('mock_session', JSON.stringify(session));
+
+    console.log('MockAuthService: Sign in successful for:', email);
+    return this.createFirebaseUser(mockUser.profile);
+  }
+
+  static async signInWithGoogle(): Promise<FirebaseMockUser> {
+    console.log('MockAuthService: Attempting Google sign in');
+
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Use admin account for Google sign in demo
+    const adminUser = mockUsers.get('admin@test.com');
+    if (!adminUser) {
+      throw new Error('Demo Google account not available');
+    }
+
+    // Store session
+    const session = {
+      user: adminUser.user,
+      access_token: `mock_google_token_${Date.now()}`
+    };
+
+    currentSession = session;
+    localStorage.setItem('mock_session', JSON.stringify(session));
+
+    const googleUser = this.createFirebaseUser({
+      ...adminUser.profile,
+      full_name: 'Google Demo User',
+      email: 'demo.google@test.com'
+    });
+
+    console.log('MockAuthService: Google sign in successful');
+    return googleUser;
+  }
+
+  static async signOut(): Promise<void> {
+    console.log('MockAuthService: Signing out');
+    currentSession = null;
+    localStorage.removeItem('mock_session');
+  }
+
+  static getCurrentUser(): FirebaseMockUser | null {
+    if (!currentSession) {
+      const stored = localStorage.getItem('mock_session');
+      if (stored) {
+        currentSession = JSON.parse(stored);
+      }
+    }
+
+    if (currentSession) {
+      // Find the user profile
+      const mockUser = mockUsers.get(currentSession.user.email);
+      if (mockUser) {
+        return this.createFirebaseUser(mockUser.profile);
+      }
+    }
+
+    return null;
+  }
+}
