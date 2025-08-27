@@ -91,6 +91,14 @@ window.addEventListener('unhandledrejection', (event) => {
     return;
   }
 
+  // Handle Firebase account creation errors in promises
+  if (reason && (reason.message?.includes('Account creation error') ||
+                 reason.message?.includes('Sign up error'))) {
+    console.warn('[Field Engineer Portal] Firebase account creation error in promise - fallback demo mode is active.');
+    event.preventDefault();
+    return;
+  }
+
   // Handle string-based reason checks
   if (typeof reason === 'string') {
     if (reason.includes('ReadableStreamDefaultReader') ||
