@@ -61,19 +61,39 @@ googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
 
-// Connect to emulators in development
-if (config.isDevelopment && !config.isProduction) {
+// Connect to emulators in development (with proper guards)
+let emulatorConnectionAttempted = false;
+
+if (config.isDevelopment && !config.isProduction && isFirebaseConfigured()) {
   const isEmulatorSetup = localStorage.getItem('firebase-emulator-setup');
-  
-  if (!isEmulatorSetup) {
+
+  if (!isEmulatorSetup && !emulatorConnectionAttempted) {
+    emulatorConnectionAttempted = true;
+
     try {
-      connectAuthEmulator(auth, 'http://localhost:9099');
-      connectFirestoreEmulator(db, 'localhost', 8080);
-      connectStorageEmulator(storage, 'localhost', 9199);
+      // Check if emulators are already connected
+      if (!(auth as any)._delegate?._authDomain?.includes('localhost')) {
+        connectAuthEmulator(auth, 'http://localhost:9099');
+      }
+
+      if (!(db as any)._delegate?._databaseId?.host?.includes('localhost')) {
+        connectFirestoreEmulator(db, 'localhost', 8080);
+      }
+
+      if (!(storage as any)._delegate?._host?.includes('localhost')) {
+        connectStorageEmulator(storage, 'localhost', 9199);
+      }
+
       localStorage.setItem('firebase-emulator-setup', 'true');
-      envLog('log', 'Connected to Firebase emulators');
-    } catch (error) {
-      envLog('warn', 'Firebase emulators not available, using production:', error);
+      envLog('log', 'Connected to Firebase emulators safely');
+    } catch (error: any) {
+      // Don't fail if emulators are already connected or not available
+      if (error.message?.includes('already')) {
+        envLog('log', 'Firebase emulators already connected');
+        localStorage.setItem('firebase-emulator-setup', 'true');
+      } else {
+        envLog('warn', 'Firebase emulators not available, using production:', error);
+      }
     }
   }
 }
