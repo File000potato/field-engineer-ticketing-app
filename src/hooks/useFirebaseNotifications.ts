@@ -25,7 +25,7 @@ export function useFirebaseNotifications() {
    */
   const notifyTicketCreated = useCallback(async (ticket: Ticket) => {
     if (!isFirebaseConfigured()) {
-      envLog('log', 'Mock notification: Ticket created');
+      envLog('error', 'Firebase not configured, cannot create notification');
       return;
     }
 
@@ -64,7 +64,7 @@ export function useFirebaseNotifications() {
    */
   const notifyTicketResolved = useCallback(async (ticket: Ticket, resolvedByUserId: string) => {
     if (!isFirebaseConfigured()) {
-      envLog('log', 'Mock notification: Ticket resolved');
+      envLog('error', 'Firebase not configured, cannot create notification');
       return;
     }
 
@@ -96,7 +96,7 @@ export function useFirebaseNotifications() {
    */
   const notifyTicketAssigned = useCallback(async (ticket: Ticket, assignedUserId: string, assignedByUserId: string) => {
     if (!isFirebaseConfigured()) {
-      envLog('log', 'Mock notification: Ticket assigned');
+      envLog('error', 'Firebase not configured, cannot create notification');
       return;
     }
 
@@ -126,7 +126,7 @@ export function useFirebaseNotifications() {
    */
   const markAsRead = useCallback(async (notificationId: string) => {
     if (!isFirebaseConfigured()) {
-      envLog('log', 'Mock: Mark notification as read');
+      envLog('error', 'Firebase not configured, cannot mark notification as read');
       return;
     }
 
@@ -144,7 +144,7 @@ export function useFirebaseNotifications() {
    */
   const markAllAsRead = useCallback(async () => {
     if (!isFirebaseConfigured()) {
-      envLog('log', 'Mock: Mark all notifications as read');
+      envLog('error', 'Firebase not configured, cannot mark all notifications as read');
       return;
     }
 
@@ -198,7 +198,7 @@ export function useFirebaseNotifications() {
     if (!user) return;
 
     if (!isFirebaseConfigured()) {
-      envLog('log', 'Mock system notification:', title);
+      envLog('error', 'Firebase not configured, cannot create system notification');
       return;
     }
 
