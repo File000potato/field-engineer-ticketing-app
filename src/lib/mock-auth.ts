@@ -290,6 +290,62 @@ export class MockAuthService {
     return googleUser;
   }
 
+  static async createAccount(email: string, password: string, fullName: string): Promise<FirebaseMockUser> {
+    console.log('MockAuthService: Attempting account creation with email:', email);
+
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if user already exists
+    for (const [key, user] of mockUsers.entries()) {
+      if (key.toLowerCase() === normalizedEmail) {
+        throw new Error('An account with this email already exists');
+      }
+    }
+
+    // Validate password strength
+    if (password.length < 6) {
+      throw new Error('Password should be at least 6 characters long');
+    }
+
+    // Create new mock user
+    const newUserId = `mock_${Date.now()}`;
+    const newMockUser = {
+      user: {
+        id: newUserId,
+        email: normalizedEmail,
+        created_at: new Date().toISOString()
+      },
+      profile: {
+        id: newUserId,
+        email: normalizedEmail,
+        full_name: fullName,
+        role: 'field_engineer' as const, // Default role for new accounts
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      password: password
+    };
+
+    // Add to mock users
+    mockUsers.set(normalizedEmail, newMockUser);
+
+    // Store session
+    const session = {
+      user: newMockUser.user,
+      access_token: `mock_token_${Date.now()}`
+    };
+
+    currentSession = session;
+    localStorage.setItem('mock_session', JSON.stringify(session));
+
+    console.log('MockAuthService: Account creation successful for:', email);
+    return this.createFirebaseUser(newMockUser.profile);
+  }
+
   static async signOut(): Promise<void> {
     console.log('MockAuthService: Signing out');
     currentSession = null;
