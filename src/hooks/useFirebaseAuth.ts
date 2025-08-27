@@ -186,42 +186,22 @@ export function useFirebaseAuth() {
   };
 
   /**
-   * Sign in with Google (very fast)
+   * Sign in with Google
    * @returns {Promise<void>}
    */
   const signInWithGoogle = async () => {
     try {
-      setState(prev => ({ ...prev, loading: true }));
+      setState(prev => ({ ...prev, loading: true, networkError: null }));
 
       // Check if Firebase is properly configured
       if (!isFirebaseConfigured()) {
-        envLog('warn', 'Firebase not configured, using mock Google authentication');
-
-        const mockUser = await MockAuthService.signInWithGoogle();
-
-        setState({
-          user: mockUser as any,
-          profile: UserProfile.fromDatabaseRecord({
-            id: mockUser.uid,
-            email: mockUser.email,
-            fullName: mockUser.displayName || 'Google User',
-            role: 'field_engineer',
-            department: null,
-            phone: null,
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }),
+        const configError = 'Firebase is not properly configured. Please check your environment variables.';
+        setState(prev => ({
+          ...prev,
           loading: false,
-          initialized: true
-        });
-
-        toast({
-          title: 'Welcome! (Demo Mode)',
-          description: 'Signed in with demo Google account.',
-        });
-
-        return;
+          networkError: configError
+        }));
+        throw new Error(configError);
       }
 
       await authService.signInWithGoogle();
@@ -233,56 +213,32 @@ export function useFirebaseAuth() {
     } catch (error: any) {
       envLog('error', 'Google sign in error:', error);
 
-      // Check if this is a Firebase network error
-      if (error.message.includes('network-request-failed') || error.message.includes('auth/network-request-failed')) {
-        envLog('warn', 'Firebase network error detected, falling back to mock Google auth');
-
-        try {
-          const mockUser = await MockAuthService.signInWithGoogle();
-
-          setState({
-            user: mockUser as any,
-            profile: UserProfile.fromDatabaseRecord({
-              id: mockUser.uid,
-              email: mockUser.email,
-              fullName: mockUser.displayName || 'Google User',
-              role: 'field_engineer',
-              department: null,
-              phone: null,
-              isActive: true,
-              createdAt: new Date(),
-              updatedAt: new Date()
-            }),
-            loading: false,
-            initialized: true
-          });
-
-          toast({
-            title: 'Welcome! (Demo Mode)',
-            description: 'Signed in with demo Google account due to network issues.',
-          });
-
-          return;
-        } catch (mockError) {
-          // If even mock auth fails, show the original error
-        }
-      }
-
       let errorMessage = 'Google sign in failed. Please try again.';
+      let isNetworkError = false;
 
       if (error.message.includes('popup-closed-by-user')) {
         errorMessage = 'Sign in was cancelled.';
       } else if (error.message.includes('network-request-failed')) {
         errorMessage = 'Network error. Please check your connection.';
+        isNetworkError = true;
       }
 
-      toast({
-        title: 'Google sign in failed',
-        description: errorMessage,
-        variant: 'destructive'
-      });
+      if (isNetworkError) {
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          networkError: errorMessage
+        }));
+      } else {
+        setState(prev => ({ ...prev, loading: false }));
 
-      setState(prev => ({ ...prev, loading: false }));
+        toast({
+          title: 'Google sign in failed',
+          description: errorMessage,
+          variant: 'destructive'
+        });
+      }
+
       throw error;
     }
   };
