@@ -34,16 +34,53 @@ export function useFirebaseAuth() {
   useEffect(() => {
     let mounted = true;
 
+    // Check if Firebase is configured first
+    if (!isFirebaseConfigured()) {
+      envLog('warn', 'Firebase not configured, checking for existing mock session');
+
+      // Check for existing mock session
+      const mockUser = MockAuthService.getCurrentUser();
+      if (mockUser) {
+        envLog('log', 'Found existing mock session:', mockUser.email);
+        setState({
+          user: mockUser as any,
+          profile: UserProfile.fromDatabaseRecord({
+            id: mockUser.uid,
+            email: mockUser.email,
+            fullName: mockUser.displayName || 'Demo User',
+            role: (mockUser as any).role || 'field_engineer',
+            department: null,
+            phone: null,
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }),
+          loading: false,
+          initialized: true
+        });
+      } else {
+        setState({
+          user: null,
+          profile: null,
+          loading: false,
+          initialized: true
+        });
+      }
+
+      // Return empty unsubscribe function since we're not using Firebase listener
+      return () => {};
+    }
+
     const unsubscribe = authService.onAuthStateChanged(async (user) => {
       if (!mounted) return;
 
       try {
         if (user) {
           envLog('log', 'User authenticated:', user.email);
-          
+
           // Get user profile from Firestore
           const profile = await dbService.getUserProfile(user.uid);
-          
+
           if (profile) {
             setState({
               user,
@@ -64,9 +101,9 @@ export function useFirebaseAuth() {
               createdAt: new Date(),
               updatedAt: new Date()
             };
-            
+
             await dbService.updateUserProfile(user.uid, defaultProfile);
-            
+
             setState({
               user,
               profile: new UserProfile(defaultProfile),
@@ -84,6 +121,32 @@ export function useFirebaseAuth() {
         }
       } catch (error) {
         envLog('error', 'Error in auth state change:', error);
+
+        // If Firebase fails, try to fall back to mock auth
+        if (error && (error as any).message?.includes('network-request-failed')) {
+          envLog('warn', 'Firebase network error in auth state listener, checking mock session');
+          const mockUser = MockAuthService.getCurrentUser();
+          if (mockUser) {
+            setState({
+              user: mockUser as any,
+              profile: UserProfile.fromDatabaseRecord({
+                id: mockUser.uid,
+                email: mockUser.email,
+                fullName: mockUser.displayName || 'Demo User',
+                role: (mockUser as any).role || 'field_engineer',
+                department: null,
+                phone: null,
+                isActive: true,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              }),
+              loading: false,
+              initialized: true
+            });
+            return;
+          }
+        }
+
         setState({
           user: null,
           profile: null,
