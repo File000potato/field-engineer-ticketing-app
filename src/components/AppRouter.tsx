@@ -17,7 +17,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Loader2 } from 'lucide-react';
 
-// Auth component for the /auth route
+// Auth component for the /auth route (must be inside Router context)
 function AuthPage() {
   const navigate = useNavigate();
 
@@ -31,48 +31,57 @@ function AuthPage() {
   );
 }
 
-export default function AppRouter() {
+// Main routing component that goes inside Router
+function AppRoutes() {
   const { user, loading } = useFirebaseAuth();
 
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      {/* Authentication route - accessible when not logged in */}
+      <Route
+        path="/auth"
+        element={
+          !user ? <AuthPage /> : <Navigate to="/" replace />
+        }
+      />
+
+      {/* Protected routes - require authentication */}
+      {user ? (
+        <Route path="/" element={<AppLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Navigate to="/" replace />} />
+          <Route path="tickets" element={<TicketsPage />} />
+          <Route path="tickets/:id" element={<TicketDetailPage />} />
+          <Route path="create" element={<CreateTicketPage />} />
+          <Route path="map" element={<MapPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="profile/:userId" element={<ProfilePage />} />
+          <Route path="engineers" element={<EngineersPage />} />
+          <Route path="admin/resolved-tickets" element={<ResolvedTicketsPage />} />
+          <Route path="admin/settings" element={<AdminSettingsPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      ) : (
+        // Redirect all other routes to auth when not logged in
+        <Route path="*" element={<Navigate to="/auth" replace />} />
+      )}
+    </Routes>
+  );
+}
+
+export default function AppRouter() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <Router>
-        {loading ? (
-          <div className="h-screen flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
-        ) : (
-          <Routes>
-            {/* Authentication route - accessible when not logged in */}
-            <Route
-              path="/auth"
-              element={
-                !user ? <AuthPage /> : <Navigate to="/" replace />
-              }
-            />
-
-            {/* Protected routes - require authentication */}
-            {user ? (
-              <Route path="/" element={<AppLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="dashboard" element={<Navigate to="/" replace />} />
-                <Route path="tickets" element={<TicketsPage />} />
-                <Route path="tickets/:id" element={<TicketDetailPage />} />
-                <Route path="create" element={<CreateTicketPage />} />
-                <Route path="map" element={<MapPage />} />
-                <Route path="profile" element={<ProfilePage />} />
-                <Route path="profile/:userId" element={<ProfilePage />} />
-                <Route path="engineers" element={<EngineersPage />} />
-                <Route path="admin/resolved-tickets" element={<ResolvedTicketsPage />} />
-                <Route path="admin/settings" element={<AdminSettingsPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            ) : (
-              // Redirect all other routes to auth when not logged in
-              <Route path="*" element={<Navigate to="/auth" replace />} />
-            )}
-          </Routes>
-        )}
+        <AppRoutes />
       </Router>
     </ThemeProvider>
   );
