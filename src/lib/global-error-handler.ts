@@ -48,10 +48,18 @@ window.addEventListener('error', (event) => {
     return;
   }
 
-  // Handle Firebase network errors
+  // Handle Firebase network errors (sign-in and account creation)
   if (error && (error.message?.includes('auth/network-request-failed') ||
                 error.message?.includes('network-request-failed'))) {
     console.warn('[Field Engineer Portal] Firebase network error - fallback authentication is active.');
+    event.preventDefault();
+    return;
+  }
+
+  // Handle Firebase account creation errors
+  if (error && (error.message?.includes('Account creation error') ||
+                error.message?.includes('Sign up error'))) {
+    console.warn('[Field Engineer Portal] Firebase account creation error - fallback demo mode is active.');
     event.preventDefault();
     return;
   }
