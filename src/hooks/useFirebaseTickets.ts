@@ -25,14 +25,7 @@ export const useFirebaseTickets = () => {
 
     try {
       if (!isFirebaseConfigured()) {
-        // Mock implementation for demo mode
-        const ticketId = `mock-${Date.now()}`;
-        toast({
-          title: 'Ticket created (Demo)',
-          description: 'This is a demo ticket creation.',
-        });
-        envLog('log', 'Mock ticket created:', ticketId);
-        return ticketId;
+        throw new Error('Firebase is not properly configured');
       }
 
       const newTicketData = {
@@ -84,13 +77,7 @@ export const useFirebaseTickets = () => {
 
     try {
       if (!isFirebaseConfigured()) {
-        // Mock implementation for demo mode
-        toast({
-          title: 'Ticket updated (Demo)',
-          description: 'This is a demo ticket update.',
-        });
-        envLog('log', 'Mock ticket updated:', ticketId);
-        return;
+        throw new Error('Firebase is not properly configured');
       }
 
       // Convert updates to Firebase format
@@ -144,13 +131,7 @@ export const useFirebaseTickets = () => {
 
     try {
       if (!isFirebaseConfigured()) {
-        // Mock implementation for demo mode
-        toast({
-          title: 'Ticket deleted (Demo)',
-          description: 'This is a demo ticket deletion.',
-        });
-        envLog('log', 'Mock ticket deleted:', ticketId);
-        return;
+        throw new Error('Firebase is not properly configured');
       }
 
       await dbService.deleteTicket(ticketId);
