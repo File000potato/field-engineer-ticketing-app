@@ -251,38 +251,17 @@ export function useFirebaseAuth() {
    */
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
-      setState(prev => ({ ...prev, loading: true }));
+      setState(prev => ({ ...prev, loading: true, networkError: null }));
 
       // Check if Firebase is properly configured
       if (!isFirebaseConfigured()) {
-        envLog('warn', 'Firebase not configured, using mock account creation');
-
-        // Use mock authentication as fallback
-        const mockUser = await MockAuthService.createAccount(email, password, fullName);
-
-        setState({
-          user: mockUser as any,
-          profile: UserProfile.fromDatabaseRecord({
-            id: mockUser.uid,
-            email: mockUser.email,
-            fullName: mockUser.displayName || fullName,
-            role: 'field_engineer', // Default role for new accounts
-            department: null,
-            phone: null,
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }),
+        const configError = 'Firebase is not properly configured. Please check your environment variables.';
+        setState(prev => ({
+          ...prev,
           loading: false,
-          initialized: true
-        });
-
-        toast({
-          title: 'Account created! (Demo Mode)',
-          description: 'Demo account has been created successfully.',
-        });
-
-        return;
+          networkError: configError
+        }));
+        throw new Error(configError);
       }
 
       await authService.createAccount(email, password, fullName);
@@ -294,42 +273,8 @@ export function useFirebaseAuth() {
     } catch (error: any) {
       envLog('error', 'Sign up error:', error);
 
-      // Check if this is a Firebase network error
-      if (error.message.includes('network-request-failed') || error.message.includes('auth/network-request-failed')) {
-        envLog('warn', 'Firebase network error detected during sign up, falling back to mock auth');
-
-        try {
-          const mockUser = await MockAuthService.createAccount(email, password, fullName);
-
-          setState({
-            user: mockUser as any,
-            profile: UserProfile.fromDatabaseRecord({
-              id: mockUser.uid,
-              email: mockUser.email,
-              fullName: mockUser.displayName || fullName,
-              role: 'field_engineer',
-              department: null,
-              phone: null,
-              isActive: true,
-              createdAt: new Date(),
-              updatedAt: new Date()
-            }),
-            loading: false,
-            initialized: true
-          });
-
-          toast({
-            title: 'Account created! (Demo Mode)',
-            description: 'Demo account has been created due to network issues.',
-          });
-
-          return;
-        } catch (mockError) {
-          // If even mock auth fails, show the original error
-        }
-      }
-
       let errorMessage = 'Account creation failed. Please try again.';
+      let isNetworkError = false;
 
       if (error.message.includes('email-already-in-use')) {
         errorMessage = 'An account with this email already exists.';
@@ -339,15 +284,25 @@ export function useFirebaseAuth() {
         errorMessage = 'Please enter a valid email address.';
       } else if (error.message.includes('network-request-failed')) {
         errorMessage = 'Network connection failed. Please check your internet connection and try again.';
+        isNetworkError = true;
       }
 
-      toast({
-        title: 'Account creation failed',
-        description: errorMessage,
-        variant: 'destructive'
-      });
+      if (isNetworkError) {
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          networkError: errorMessage
+        }));
+      } else {
+        setState(prev => ({ ...prev, loading: false }));
 
-      setState(prev => ({ ...prev, loading: false }));
+        toast({
+          title: 'Account creation failed',
+          description: errorMessage,
+          variant: 'destructive'
+        });
+      }
+
       throw error;
     }
   };
