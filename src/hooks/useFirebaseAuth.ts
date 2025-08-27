@@ -99,36 +99,17 @@ export function useFirebaseAuth() {
       } catch (error) {
         envLog('error', 'Error in auth state change:', error);
 
-        // If Firebase fails, try to fall back to mock auth
-        if (error && (error as any).message?.includes('network-request-failed')) {
-          envLog('warn', 'Firebase network error in auth state listener, checking mock session');
-          const mockUser = MockAuthService.getCurrentUser();
-          if (mockUser) {
-            setState({
-              user: mockUser as any,
-              profile: UserProfile.fromDatabaseRecord({
-                id: mockUser.uid,
-                email: mockUser.email,
-                fullName: mockUser.displayName || 'Demo User',
-                role: (mockUser as any).role || 'field_engineer',
-                department: null,
-                phone: null,
-                isActive: true,
-                createdAt: new Date(),
-                updatedAt: new Date()
-              }),
-              loading: false,
-              initialized: true
-            });
-            return;
-          }
-        }
+        // Handle Firebase network errors
+        const isNetworkError = error && (error as any).message?.includes('network-request-failed');
 
         setState({
           user: null,
           profile: null,
           loading: false,
-          initialized: true
+          initialized: true,
+          networkError: isNetworkError
+            ? 'Network connection failed. Please check your internet connection and try again.'
+            : `Authentication service error: ${(error as any)?.message || 'Unknown error'}`
         });
       }
     });
