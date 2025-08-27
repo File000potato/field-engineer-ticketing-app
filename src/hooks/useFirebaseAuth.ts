@@ -315,20 +315,17 @@ export function useFirebaseAuth() {
     try {
       setState(prev => ({ ...prev, loading: true }));
 
-      // Check if we're using Firebase or mock authentication
-      if (!isFirebaseConfigured() || MockAuthService.getCurrentUser()) {
-        await MockAuthService.signOut();
-        envLog('log', 'Mock user signed out');
-      } else {
+      if (isFirebaseConfigured()) {
         await authService.signOut();
       }
 
-      // Clear state regardless of auth type
+      // Clear state
       setState({
         user: null,
         profile: null,
         loading: false,
-        initialized: true
+        initialized: true,
+        networkError: null
       });
 
       toast({
@@ -347,7 +344,8 @@ export function useFirebaseAuth() {
         user: null,
         profile: null,
         loading: false,
-        initialized: true
+        initialized: true,
+        networkError: null
       });
 
       toast({
