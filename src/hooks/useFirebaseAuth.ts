@@ -6,7 +6,6 @@
 import { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { authService, dbService, isFirebaseConfigured } from '@/lib/firebase';
-import { MockAuthService } from '@/lib/mock-auth';
 import { UserProfile } from '@/models/User';
 import { toast } from '@/components/ui/use-toast';
 import { envLog } from '@/config/environment';
