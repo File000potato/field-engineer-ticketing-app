@@ -121,44 +121,23 @@ export function useFirebaseAuth() {
   }, []);
 
   /**
-   * Sign in with email and password (fast)
+   * Sign in with email and password
    * @param {string} email - User email
    * @param {string} password - User password
    */
   const signIn = async (email: string, password: string) => {
     try {
-      setState(prev => ({ ...prev, loading: true }));
+      setState(prev => ({ ...prev, loading: true, networkError: null }));
 
       // Check if Firebase is properly configured
       if (!isFirebaseConfigured()) {
-        envLog('warn', 'Firebase not configured, using mock authentication');
-
-        // Use mock authentication as fallback
-        const mockUser = await MockAuthService.signIn(email, password);
-
-        setState({
-          user: mockUser as any, // Mock user simulating Firebase user
-          profile: UserProfile.fromDatabaseRecord({
-            id: mockUser.uid,
-            email: mockUser.email,
-            fullName: mockUser.displayName || 'Test User',
-            role: mockUser.role || 'field_engineer',
-            department: null,
-            phone: null,
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }),
+        const configError = 'Firebase is not properly configured. Please check your environment variables.';
+        setState(prev => ({
+          ...prev,
           loading: false,
-          initialized: true
-        });
-
-        toast({
-          title: 'Welcome back! (Demo Mode)',
-          description: 'Signed in with demo credentials.',
-        });
-
-        return;
+          networkError: configError
+        }));
+        throw new Error(configError);
       }
 
       await authService.signInWithEmail(email, password);
@@ -170,42 +149,8 @@ export function useFirebaseAuth() {
     } catch (error: any) {
       envLog('error', 'Sign in error:', error);
 
-      // Check if this is a Firebase network error
-      if (error.message.includes('network-request-failed') || error.message.includes('auth/network-request-failed')) {
-        envLog('warn', 'Firebase network error detected, falling back to mock auth');
-
-        try {
-          const mockUser = await MockAuthService.signIn(email, password);
-
-          setState({
-            user: mockUser as any,
-            profile: UserProfile.fromDatabaseRecord({
-              id: mockUser.uid,
-              email: mockUser.email,
-              fullName: mockUser.displayName || 'Test User',
-              role: mockUser.role || 'field_engineer',
-              department: null,
-              phone: null,
-              isActive: true,
-              createdAt: new Date(),
-              updatedAt: new Date()
-            }),
-            loading: false,
-            initialized: true
-          });
-
-          toast({
-            title: 'Welcome back! (Demo Mode)',
-            description: 'Signed in with demo credentials due to network issues.',
-          });
-
-          return;
-        } catch (mockError) {
-          // If even mock auth fails, show the original error
-        }
-      }
-
       let errorMessage = 'Sign in failed. Please try again.';
+      let isNetworkError = false;
 
       if (error.message.includes('user-not-found')) {
         errorMessage = 'No account found with this email address.';
@@ -217,15 +162,25 @@ export function useFirebaseAuth() {
         errorMessage = 'Too many sign-in attempts. Please try again later.';
       } else if (error.message.includes('network-request-failed')) {
         errorMessage = 'Network connection failed. Please check your internet connection and try again.';
+        isNetworkError = true;
       }
 
-      toast({
-        title: 'Sign in failed',
-        description: errorMessage,
-        variant: 'destructive'
-      });
+      if (isNetworkError) {
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          networkError: errorMessage
+        }));
+      } else {
+        setState(prev => ({ ...prev, loading: false }));
 
-      setState(prev => ({ ...prev, loading: false }));
+        toast({
+          title: 'Sign in failed',
+          description: errorMessage,
+          variant: 'destructive'
+        });
+      }
+
       throw error;
     }
   };
