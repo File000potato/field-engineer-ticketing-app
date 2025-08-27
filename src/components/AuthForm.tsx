@@ -210,10 +210,10 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
           <Alert className="mt-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription className="text-xs">
-              <strong>Demo Mode:</strong> Use test accounts:<br/>
-              • admin@test.com / admin123<br/>
-              • supervisor@test.com / supervisor123<br/>
-              • engineer@test.com / engineer123
+              <strong>Demo Mode Active:</strong> Firebase not configured, using test accounts:<br/>
+              • <span className="font-mono">admin@test.com</span> / <span className="font-mono">admin123</span> (Admin)<br/>
+              • <span className="font-mono">supervisor@test.com</span> / <span className="font-mono">supervisor123</span> (Supervisor)<br/>
+              • <span className="font-mono">engineer@test.com</span> / <span className="font-mono">engineer123</span> (Field Engineer)
             </AlertDescription>
           </Alert>
         </CardHeader>
