@@ -53,6 +53,11 @@ function AppRoutes() {
         }
       />
 
+      {/* Legacy auth routes - redirect to /auth */}
+      <Route path="/login" element={<Navigate to="/auth" replace />} />
+      <Route path="/signin" element={<Navigate to="/auth" replace />} />
+      <Route path="/signup" element={<Navigate to="/auth" replace />} />
+
       {/* Protected routes - require authentication */}
       {user ? (
         <Route path="/" element={<AppLayout />}>
