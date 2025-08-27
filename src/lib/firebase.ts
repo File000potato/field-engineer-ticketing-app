@@ -262,8 +262,14 @@ export const dbService = {
    */
   getTicketsRealtime(userId: string, userRole: string, callback: (tickets: any[]) => void): () => void {
     try {
+      // Check if Firebase is properly configured
+      if (!isFirebaseConfigured()) {
+        envLog('warn', 'Firebase not configured, cannot setup tickets listener');
+        return () => {};
+      }
+
       let q;
-      
+
       if (userRole === 'admin' || userRole === 'supervisor') {
         // Admins and supervisors see all tickets
         q = query(collection(db, 'tickets'), orderBy('createdAt', 'desc'));
@@ -276,20 +282,58 @@ export const dbService = {
         );
       }
 
-      return onSnapshot(q, (snapshot: QuerySnapshot<DocumentData>) => {
-        const tickets = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          // Convert Firestore timestamps to JavaScript dates
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          resolvedAt: doc.data().resolvedAt?.toDate(),
-          dueDate: doc.data().dueDate?.toDate()
-        }));
-        callback(tickets);
-      }, (error) => {
-        envLog('error', 'Error in tickets real-time listener:', error);
-      });
+      let unsubscribed = false;
+
+      const unsubscribe = onSnapshot(q,
+        (snapshot: QuerySnapshot<DocumentData>) => {
+          if (unsubscribed) return; // Prevent processing if already unsubscribed
+
+          try {
+            const tickets = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data(),
+              // Convert Firestore timestamps to JavaScript dates
+              createdAt: doc.data().createdAt?.toDate(),
+              updatedAt: doc.data().updatedAt?.toDate(),
+              resolvedAt: doc.data().resolvedAt?.toDate(),
+              dueDate: doc.data().dueDate?.toDate()
+            }));
+            callback(tickets);
+          } catch (error) {
+            envLog('error', 'Error processing tickets snapshot:', error);
+          }
+        },
+        (error) => {
+          if (unsubscribed) return; // Don't handle errors if already unsubscribed
+
+          envLog('error', 'Error in tickets real-time listener:', error);
+
+          // Handle specific stream errors
+          if (error.message?.includes('ReadableStream') || error.message?.includes('locked to a reader')) {
+            envLog('warn', 'Stream reader conflict detected, cleaning up listener');
+            unsubscribed = true;
+            if (typeof unsubscribe === 'function') {
+              try {
+                unsubscribe();
+              } catch (cleanupError) {
+                envLog('warn', 'Error during listener cleanup:', cleanupError);
+              }
+            }
+          }
+        }
+      );
+
+      // Return wrapped unsubscribe function
+      return () => {
+        if (!unsubscribed) {
+          unsubscribed = true;
+          try {
+            unsubscribe();
+          } catch (error) {
+            envLog('warn', 'Error unsubscribing from tickets listener:', error);
+          }
+        }
+      };
     } catch (error) {
       envLog('error', 'Error setting up tickets listener:', error);
       return () => {}; // Return empty unsubscribe function
@@ -412,22 +456,66 @@ export const dbService = {
    */
   getNotificationsRealtime(userId: string, callback: (notifications: any[]) => void): () => void {
     try {
+      // Check if Firebase is properly configured
+      if (!isFirebaseConfigured()) {
+        envLog('warn', 'Firebase not configured, cannot setup notifications listener');
+        return () => {};
+      }
+
       const q = query(
         collection(db, 'notifications'),
         where('userId', '==', userId),
         orderBy('createdAt', 'desc')
       );
 
-      return onSnapshot(q, (snapshot) => {
-        const notifications = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate()
-        }));
-        callback(notifications);
-      }, (error) => {
-        envLog('error', 'Error in notifications listener:', error);
-      });
+      let unsubscribed = false;
+
+      const unsubscribe = onSnapshot(q,
+        (snapshot) => {
+          if (unsubscribed) return; // Prevent processing if already unsubscribed
+
+          try {
+            const notifications = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data(),
+              createdAt: doc.data().createdAt?.toDate()
+            }));
+            callback(notifications);
+          } catch (error) {
+            envLog('error', 'Error processing notifications snapshot:', error);
+          }
+        },
+        (error) => {
+          if (unsubscribed) return; // Don't handle errors if already unsubscribed
+
+          envLog('error', 'Error in notifications listener:', error);
+
+          // Handle specific stream errors
+          if (error.message?.includes('ReadableStream') || error.message?.includes('locked to a reader')) {
+            envLog('warn', 'Stream reader conflict detected in notifications, cleaning up listener');
+            unsubscribed = true;
+            if (typeof unsubscribe === 'function') {
+              try {
+                unsubscribe();
+              } catch (cleanupError) {
+                envLog('warn', 'Error during notifications listener cleanup:', cleanupError);
+              }
+            }
+          }
+        }
+      );
+
+      // Return wrapped unsubscribe function
+      return () => {
+        if (!unsubscribed) {
+          unsubscribed = true;
+          try {
+            unsubscribe();
+          } catch (error) {
+            envLog('warn', 'Error unsubscribing from notifications listener:', error);
+          }
+        }
+      };
     } catch (error) {
       envLog('error', 'Error setting up notifications listener:', error);
       return () => {};
