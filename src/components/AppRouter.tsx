@@ -10,6 +10,7 @@ import AdminSettingsPage from '@/pages/AdminSettingsPage';
 import EngineersPage from '@/pages/EngineersPage';
 import ResolvedTicketsPage from '@/pages/ResolvedTicketsPage';
 import NotFound from '@/pages/NotFound';
+import NetworkFailure from '@/pages/NetworkFailure';
 import AppLayout from '@/components/AppLayout';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import AuthForm from '@/components/AuthForm';
@@ -33,13 +34,22 @@ function AuthPage() {
 
 // Main routing component that goes inside Router
 function AppRoutes() {
-  const { user, loading } = useFirebaseAuth();
+  const { user, loading, networkError } = useFirebaseAuth();
 
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
+    );
+  }
+
+  if (networkError) {
+    return (
+      <NetworkFailure
+        error={networkError}
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 
