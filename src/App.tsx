@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Loader2 } from 'lucide-react';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import OfflineQueueProvider from '@/components/OfflineQueueProvider';
+import { FirebaseDataProvider } from '@/contexts/FirebaseDataContext';
 
 // Lazy load the main router for better performance
 const AppRouter = React.lazy(() => import('@/components/AppRouter'));
@@ -43,9 +44,11 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <OfflineQueueProvider>
-          <Suspense fallback={<LoadingFallback />}>
-            <AppRouter />
-          </Suspense>
+          <FirebaseDataProvider>
+            <Suspense fallback={<LoadingFallback />}>
+              <AppRouter />
+            </Suspense>
+          </FirebaseDataProvider>
           <Toaster />
         </OfflineQueueProvider>
       </QueryClientProvider>
