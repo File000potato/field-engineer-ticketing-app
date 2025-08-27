@@ -206,24 +206,12 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
             Secure access to your maintenance management system
           </p>
 
-          {/* Test Account Information */}
+          {/* Authentication Information */}
           <Alert className="mt-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription className="text-xs">
-              <strong>Demo Mode Active:</strong> Firebase not configured, using test accounts:<br/>
-              {activeTab === 'signin' ? (
-                <>
-                  • <span className="font-mono">admin@test.com</span> / <span className="font-mono">admin123</span> (Admin)<br/>
-                  • <span className="font-mono">supervisor@test.com</span> / <span className="font-mono">supervisor123</span> (Supervisor)<br/>
-                  • <span className="font-mono">engineer@test.com</span> / <span className="font-mono">engineer123</span> (Field Engineer)
-                </>
-              ) : (
-                <>
-                  Create any demo account with email/password.<br/>
-                  New accounts are assigned Field Engineer role by default.<br/>
-                  <span className="text-muted-foreground">Note: Demo accounts are not persistent.</span>
-                </>
-              )}
+              <strong>Field Engineer Portal:</strong> Secure authentication required.<br/>
+              Contact your system administrator for account access or if you're experiencing connection issues.
             </AlertDescription>
           </Alert>
         </CardHeader>
