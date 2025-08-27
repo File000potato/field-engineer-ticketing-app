@@ -61,17 +61,12 @@ export function FirebaseDataProvider({ children }: { children: React.ReactNode }
       setEngineersLoading(true);
       
       if (!isFirebaseConfigured()) {
-        // Use mock data when Firebase is not configured
-        const mockEngineers = [
-          { id: '1', full_name: 'Admin User', email: 'admin@test.com', role: 'admin', is_active: true },
-          { id: '2', full_name: 'Supervisor User', email: 'supervisor@test.com', role: 'supervisor', is_active: true },
-          { id: '3', full_name: 'Field Engineer', email: 'engineer@test.com', role: 'field_engineer', is_active: true }
-        ];
-        setEngineers(mockEngineers);
-      } else {
-        const engineersData = await dbService.getUsersByRole();
-        setEngineers(engineersData);
-      }
+      envLog('error', 'Firebase not configured, cannot load engineers');
+      setEngineers([]);
+    } else {
+      const engineersData = await dbService.getUsersByRole();
+      setEngineers(engineersData);
+    }
       
       setEngineersLoading(false);
     } catch (error) {
@@ -98,43 +93,9 @@ export function FirebaseDataProvider({ children }: { children: React.ReactNode }
     setTicketsError(null);
 
     if (!isFirebaseConfigured()) {
-      // Use mock data when Firebase is not configured
-      envLog('log', 'Using mock tickets data');
-      const mockTickets = [
-        {
-          id: '1',
-          ticketNumber: 'TKT-001',
-          title: 'Demo Maintenance Task',
-          description: 'This is a demo maintenance ticket',
-          type: 'maintenance',
-          priority: 'medium',
-          status: 'open',
-          createdBy: user.uid,
-          assignedTo: null,
-          location: 'Demo Location',
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      ];
-      
-      const ticketModels = mockTickets.map(ticketData => 
-        Ticket.fromDatabaseRecord({
-          id: ticketData.id,
-          ticket_number: ticketData.ticketNumber,
-          title: ticketData.title,
-          description: ticketData.description,
-          type: ticketData.type,
-          priority: ticketData.priority,
-          status: ticketData.status,
-          created_by: ticketData.createdBy,
-          assigned_to: ticketData.assignedTo,
-          location: ticketData.location,
-          created_at: ticketData.createdAt.toISOString(),
-          updated_at: ticketData.updatedAt.toISOString()
-        })
-      );
-      
-      setTickets(ticketModels);
+      envLog('error', 'Firebase not configured, cannot load tickets');
+      setTicketsError('Firebase is not properly configured');
+      setTickets([]);
       setTicketsLoading(false);
       return;
     }
