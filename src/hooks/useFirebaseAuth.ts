@@ -15,6 +15,7 @@ interface AuthState {
   profile: UserProfile | null;
   loading: boolean;
   initialized: boolean;
+  networkError: string | null;
 }
 
 /**
@@ -26,7 +27,8 @@ export function useFirebaseAuth() {
     user: null,
     profile: null,
     loading: true,
-    initialized: false
+    initialized: false,
+    networkError: null
   });
 
   // Listen to authentication state changes
