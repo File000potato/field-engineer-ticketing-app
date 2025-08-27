@@ -1,82 +1,19 @@
 /**
- * @fileoverview Firebase-based tickets hook for real-time ticket management
+ * @fileoverview Firebase-based tickets hook that uses centralized data context
  * @author Field Engineer Portal Team
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { dbService } from '@/lib/firebase';
+import { useCallback } from 'react';
+import { dbService, isFirebaseConfigured } from '@/lib/firebase';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import { useFirebaseData } from '@/contexts/FirebaseDataContext';
 import { Ticket } from '@/models/Ticket';
 import { toast } from '@/components/ui/use-toast';
 import { envLog } from '@/config/environment';
 
 export const useFirebaseTickets = () => {
   const { user, profile } = useFirebaseAuth();
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Load tickets with real-time updates
-  useEffect(() => {
-    if (!user || !profile) {
-      setTickets([]);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    // Set up real-time listener
-    const unsubscribe = dbService.getTicketsRealtime(
-      user.uid,
-      profile.role,
-      (firebaseTickets) => {
-        try {
-          // Convert Firebase data to Ticket models
-          const ticketModels = firebaseTickets.map(ticketData => 
-            Ticket.fromDatabaseRecord({
-              id: ticketData.id,
-              ticket_number: ticketData.ticketNumber || `TKT-${ticketData.id.slice(-6)}`,
-              title: ticketData.title,
-              description: ticketData.description,
-              type: ticketData.type || 'maintenance',
-              priority: ticketData.priority || 'medium',
-              status: ticketData.status || 'open',
-              created_by: ticketData.createdBy,
-              assigned_to: ticketData.assignedTo,
-              verified_by: ticketData.verifiedBy,
-              equipment_id: ticketData.equipmentId,
-              location: ticketData.location,
-              created_at: ticketData.createdAt?.toISOString() || new Date().toISOString(),
-              updated_at: ticketData.updatedAt?.toISOString() || new Date().toISOString(),
-              due_date: ticketData.dueDate?.toISOString(),
-              resolved_at: ticketData.resolvedAt?.toISOString(),
-              estimated_hours: ticketData.estimatedHours,
-              actual_hours: ticketData.actualHours || 0,
-              notes: ticketData.notes,
-              created_by_profile: ticketData.createdByProfile,
-              assigned_to_profile: ticketData.assignedToProfile,
-              verified_by_profile: ticketData.verifiedByProfile,
-              equipment: ticketData.equipment
-            })
-          );
-
-          setTickets(ticketModels);
-          setLoading(false);
-          envLog('log', `Loaded ${ticketModels.length} tickets in real-time`);
-        } catch (error) {
-          envLog('error', 'Error processing tickets data:', error);
-          setError('Failed to process tickets data');
-          setLoading(false);
-        }
-      }
-    );
-
-    return () => {
-      unsubscribe();
-    };
-  }, [user, profile]);
+  const { tickets, ticketsLoading: loading, ticketsError: error, engineers } = useFirebaseData();
 
   /**
    * Create a new ticket
@@ -87,7 +24,16 @@ export const useFirebaseTickets = () => {
     if (!user) throw new Error('User not authenticated');
 
     try {
-      setLoading(true);
+      if (!isFirebaseConfigured()) {
+        // Mock implementation for demo mode
+        const ticketId = `mock-${Date.now()}`;
+        toast({
+          title: 'Ticket created (Demo)',
+          description: 'This is a demo ticket creation.',
+        });
+        envLog('log', 'Mock ticket created:', ticketId);
+        return ticketId;
+      }
 
       const newTicketData = {
         ticketNumber: `TKT-${Date.now().toString().slice(-6)}`,
@@ -124,8 +70,6 @@ export const useFirebaseTickets = () => {
       });
       
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -139,7 +83,15 @@ export const useFirebaseTickets = () => {
     if (!user) throw new Error('User not authenticated');
 
     try {
-      setLoading(true);
+      if (!isFirebaseConfigured()) {
+        // Mock implementation for demo mode
+        toast({
+          title: 'Ticket updated (Demo)',
+          description: 'This is a demo ticket update.',
+        });
+        envLog('log', 'Mock ticket updated:', ticketId);
+        return;
+      }
 
       // Convert updates to Firebase format
       const firebaseUpdates: any = {};
@@ -179,8 +131,6 @@ export const useFirebaseTickets = () => {
       });
       
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -193,7 +143,15 @@ export const useFirebaseTickets = () => {
     if (!user) throw new Error('User not authenticated');
 
     try {
-      setLoading(true);
+      if (!isFirebaseConfigured()) {
+        // Mock implementation for demo mode
+        toast({
+          title: 'Ticket deleted (Demo)',
+          description: 'This is a demo ticket deletion.',
+        });
+        envLog('log', 'Mock ticket deleted:', ticketId);
+        return;
+      }
 
       await dbService.deleteTicket(ticketId);
       
@@ -213,8 +171,6 @@ export const useFirebaseTickets = () => {
       });
       
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -297,6 +253,8 @@ export const useFirebaseTickets = () => {
     tickets,
     loading,
     error,
+    users: engineers, // Alias for backward compatibility
+    engineers, // Direct access to engineers
     createTicket,
     updateTicket,
     deleteTicket,
