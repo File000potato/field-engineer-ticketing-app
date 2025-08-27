@@ -37,38 +37,14 @@ export function useFirebaseAuth() {
 
     // Check if Firebase is configured first
     if (!isFirebaseConfigured()) {
-      envLog('warn', 'Firebase not configured, checking for existing mock session');
-
-      // Check for existing mock session
-      const mockUser = MockAuthService.getCurrentUser();
-      if (mockUser) {
-        envLog('log', 'Found existing mock session:', mockUser.email);
-        setState({
-          user: mockUser as any,
-          profile: UserProfile.fromDatabaseRecord({
-            id: mockUser.uid,
-            email: mockUser.email,
-            fullName: mockUser.displayName || 'Demo User',
-            role: (mockUser as any).role || 'field_engineer',
-            department: null,
-            phone: null,
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }),
-          loading: false,
-          initialized: true
-        });
-      } else {
-        setState({
-          user: null,
-          profile: null,
-          loading: false,
-          initialized: true
-        });
-      }
-
-      // Return empty unsubscribe function since we're not using Firebase listener
+      envLog('error', 'Firebase not configured');
+      setState({
+        user: null,
+        profile: null,
+        loading: false,
+        initialized: true,
+        networkError: 'Firebase is not properly configured. Please check your environment variables.'
+      });
       return () => {};
     }
 
