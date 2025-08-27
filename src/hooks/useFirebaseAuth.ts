@@ -423,6 +423,7 @@ export function useFirebaseAuth() {
     profile: state.profile,
     loading: state.loading,
     initialized: state.initialized,
+    networkError: state.networkError,
     isAuthenticated: !!state.user,
     isAdmin,
     isSupervisor,
