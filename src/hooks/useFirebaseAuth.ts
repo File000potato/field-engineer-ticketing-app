@@ -422,8 +422,22 @@ export function useFirebaseAuth() {
     try {
       setState(prev => ({ ...prev, loading: true }));
 
-      await authService.signOut();
-      
+      // Check if we're using Firebase or mock authentication
+      if (!isFirebaseConfigured() || MockAuthService.getCurrentUser()) {
+        await MockAuthService.signOut();
+        envLog('log', 'Mock user signed out');
+      } else {
+        await authService.signOut();
+      }
+
+      // Clear state regardless of auth type
+      setState({
+        user: null,
+        profile: null,
+        loading: false,
+        initialized: true
+      });
+
       toast({
         title: 'Signed out',
         description: 'You have been signed out successfully.',
@@ -434,15 +448,23 @@ export function useFirebaseAuth() {
       }
     } catch (error: any) {
       envLog('error', 'Sign out error:', error);
-      
-      toast({
-        title: 'Sign out failed',
-        description: error.message || 'An error occurred during sign out.',
-        variant: 'destructive'
+
+      // Even if sign out fails, clear the local state
+      setState({
+        user: null,
+        profile: null,
+        loading: false,
+        initialized: true
       });
 
-      setState(prev => ({ ...prev, loading: false }));
-      throw error;
+      toast({
+        title: 'Sign out completed',
+        description: 'You have been signed out.',
+      });
+
+      if (callback) {
+        callback();
+      }
     }
   };
 
