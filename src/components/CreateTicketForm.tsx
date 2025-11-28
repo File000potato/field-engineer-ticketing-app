@@ -5,7 +5,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import MediaCapture from '@/components/MediaCapture';
 import { ArrowLeft, Send } from 'lucide-react';
 
 interface CreateTicketFormProps {
@@ -41,7 +40,13 @@ export default function CreateTicketForm({ onSubmit, onCancel }: CreateTicketFor
       
       onSubmit(ticketData);
     } catch (error) {
-      console.error('Error creating ticket:', error);
+      console.error('Error creating ticket:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        formData: formData,
+        component: 'CreateTicketForm',
+        error: error
+      });
     } finally {
       setLoading(false);
     }
@@ -169,7 +174,6 @@ export default function CreateTicketForm({ onSubmit, onCancel }: CreateTicketFor
             
             <div>
               <Label>Media Attachments</Label>
-              <MediaCapture onMediaCapture={setMediaFiles} />
             </div>
             
             <div className="sticky bottom-0 bg-background pt-4">
